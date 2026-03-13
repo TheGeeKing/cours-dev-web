@@ -11,7 +11,7 @@ The module brief calls for practical work that helps learners:
 
 - use version control in context
 - produce quality mockups and interface work
-- integrate automated tests
+- integrate automated tests with a simple and consistent workflow
 
 The brief also suggests realistic features such as profile management, article selection, address forms, component library usage, dynamic maps, camera capture, large file transfer, and video chat.
 
@@ -89,6 +89,7 @@ This pattern is intended as a teaching aid, not as a rigid framework. It gives l
 
 - The repository remains one coherent application, not a set of disconnected mini-projects.
 - Strong automated testing is a project goal from the start.
+- Vitest is the default automated testing framework for this project.
 - Security applies from the core phase onward through authentication, authorization, server-side validation, and controlled data access.
 - Future runtime APIs and database models may change during implementation, but this document defines the planning baseline and sequencing rules now.
 

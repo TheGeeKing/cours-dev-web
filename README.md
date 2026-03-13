@@ -8,7 +8,7 @@ The project supports hands-on practice around the module goals:
 
 - use version control in a real project
 - produce quality UI mockups and integrations
-- add automated tests as features are introduced
+- add automated tests with Vitest as features are introduced
 - work on common product flows such as profile management, article selection, and validated forms
 - learn how frontend and backend concerns connect in a secure, responsive application
 
@@ -72,5 +72,6 @@ Not all modules will be implemented at once. Core modules are mandatory. Advance
 - Keep the current stack and extend it incrementally
 - Document key decisions before major implementation work
 - Build core flows before advanced media features
+- Use Vitest as the default automated test framework for planned tests
 - Treat testing as part of each phase, not as a final cleanup task
 - Use the project to practice both product thinking and technical execution

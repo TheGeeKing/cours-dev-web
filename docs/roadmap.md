@@ -14,6 +14,7 @@ This roadmap translates the project direction into phased implementation work. I
 
 - Replace starter-oriented documentation with project-oriented documentation
 - Confirm the baseline architecture and scope conventions
+- Record Vitest as the default testing framework for future automated tests
 - Identify the first functional modules and their responsibilities
 
 ### Deliverables
@@ -21,10 +22,12 @@ This roadmap translates the project direction into phased implementation work. I
 - Updated README with project goals and learning scope
 - Main MADR describing project direction
 - Roadmap document describing phased delivery
+- Documented testing baseline based on Vitest
 
 ### Test expectations
 
 - Review documentation for consistency with the current repository baseline
+- Ensure Vitest is identified as the default testing framework
 - Ensure core scope and stretch scope are clearly separated
 
 ### Acceptance criteria
@@ -56,9 +59,9 @@ This roadmap translates the project direction into phased implementation work. I
 
 ### Test expectations
 
-- Add automated tests for the main happy-path flows
-- Add validation tests for incorrect or incomplete address data
-- Add authorization tests for protected profile actions
+- Add Vitest automated tests for the main happy-path flows
+- Add Vitest validation tests for incorrect or incomplete address data
+- Add Vitest authorization tests for protected profile actions
 
 ### Acceptance criteria
 
@@ -92,9 +95,9 @@ This roadmap translates the project direction into phased implementation work. I
 
 ### Test expectations
 
-- Add component and integration tests for major UI states
+- Add Vitest component and integration tests for major UI states
 - Add responsive scenario checks for the main screens
-- Extend security-oriented tests around protected data access and invalid inputs
+- Extend Vitest security-oriented tests around protected data access and invalid inputs
 
 ### Acceptance criteria
 
@@ -127,8 +130,8 @@ This roadmap translates the project direction into phased implementation work. I
 
 ### Test expectations
 
-- Add targeted tests for permissions, failure states, and unsupported environments
-- Add tests or documented checks for upload constraints and real-time session behavior
+- Add Vitest targeted tests for permissions, failure states, and unsupported environments
+- Add Vitest tests or documented checks for upload constraints and real-time session behavior
 - Keep core flow regression coverage active while stretch features are added
 
 ### Acceptance criteria
@@ -141,5 +144,6 @@ This roadmap translates the project direction into phased implementation work. I
 
 - Core features are mandatory before advanced features are treated as committed scope.
 - Testing is part of every phase.
+- Vitest is the default framework for automated tests across phases.
 - Security work starts with the first real user flows and continues through all later phases.
 - New architectural decisions should be documented with additional ADRs when they materially affect delivery or structure.
