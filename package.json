@@ -12,7 +12,7 @@
 		"db:migrate": "drizzle-kit migrate",
 		"db:push": "drizzle-kit push",
 		"db:studio": "drizzle-kit studio",
-		"dev": "next dev --turbo",
+		"dev": "next dev",
 		"preview": "next build && next start",
 		"start": "next start",
 		"typecheck": "tsc --noEmit",
@@ -28,9 +28,9 @@
 		"@trpc/tanstack-react-query": "^11.12.0",
 		"better-auth": "^1.5",
 		"drizzle-orm": "^0.41.0",
-		"next": "^15.2.3",
-		"react": "^19.2.4",
-		"react-dom": "^19.2.4",
+		"next": "16.1.6",
+		"react": "19.2.4",
+		"react-dom": "19.2.4",
 		"server-only": "^0.0.1",
 		"superjson": "^2.2.6",
 		"zod": "^4.3.6"
@@ -39,8 +39,8 @@
 		"@biomejs/biome": "^2.2.5",
 		"@tailwindcss/postcss": "^4.2.1",
 		"@types/node": "^24.12.0",
-		"@types/react": "^19.2.14",
-		"@types/react-dom": "^19.2.3",
+		"@types/react": "19.2.14",
+		"@types/react-dom": "19.2.3",
 		"drizzle-kit": "^0.30.5",
 		"npm-check-updates": "^19.6.3",
 		"postcss": "^8.5.8",
@@ -52,5 +52,9 @@
 	},
 	"engines": {
 		"node": ">=24"
+	},
+	"overrides": {
+		"@types/react": "19.2.14",
+		"@types/react-dom": "19.2.3"
 	}
 }
