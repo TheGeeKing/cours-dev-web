@@ -1,149 +1,270 @@
 # Implementation Roadmap
 
-This roadmap translates the project direction into phased implementation work. It is designed to keep core learning goals in focus while reserving advanced media features for later iterations.
+This roadmap translates the exam requirements into a delivery order that keeps the project manageable. The application is modular by design: some modules share data and user flows, while others exist primarily because they are required by the exam brief. All modules must still live inside one maintainable application and follow the same architectural rules.
 
-## Phase 1 - Foundation and documentation alignment
+## Phase 1 - Documentation reset and architecture baseline
 
 ### Learner outcomes
 
-- Understand the current stack and repository structure
-- Connect the module brief to a concrete project direction
-- Learn how architecture decisions and roadmap planning guide implementation
+- Understand the repository baseline and the exam-driven project direction
+- Learn how ADRs and roadmaps drive implementation choices
+- Understand that `MVVM` is a required implementation rule, not an optional style
 
 ### Technical goals
 
 - Replace starter-oriented documentation with project-oriented documentation
-- Confirm the baseline architecture and scope conventions
-- Record Vitest as the default testing framework for future automated tests
-- Identify the first functional modules and their responsibilities
+- Reframe the project as a modular exam application
+- Record feature-based `MVVM` as a mandatory rule
+- Confirm the implementation order for core and later required modules
 
 ### Deliverables
 
-- Updated README with project goals and learning scope
-- Main MADR describing project direction
-- Roadmap document describing phased delivery
-- Documented testing baseline based on Vitest
+- Updated README
+- Updated project-direction ADR
+- New MVVM ADR
+- Updated roadmap aligned with required module sequencing
 
 ### Test expectations
 
 - Review documentation for consistency with the current repository baseline
-- Ensure Vitest is identified as the default testing framework
-- Ensure core scope and stretch scope are clearly separated
+- Ensure `Vitest` remains the default test framework
+- Ensure later advanced modules are described as required later phases, not optional stretch work
 
 ### Acceptance criteria
 
 - The repository no longer presents itself as a generic starter
-- The project direction, stack choice, and sequencing rationale are documented
+- The docs describe the actual exam-driven project shape
+- `MVVM` is documented as a hard rule
 
-## Phase 2 - Core user flows and domain model
+## Phase 2 - Engineering baseline cleanup and test harness
+
+### Learner outcomes
+
+- Learn how to stabilize a scaffold before feature work
+- Establish a repeatable automated testing workflow
+
+### Technical goals
+
+- Remove starter-only UI and sample demo behavior
+- Replace fragile scaffold defaults that block reliable builds
+- Add a minimal app shell suitable for the project direction
+- Install `Vitest` and the first automated tests
+
+### Deliverables
+
+- Cleaned app shell
+- No sample `post` demo in the main flow
+- Working `Vitest` setup with component and model/server test examples
+
+### Test expectations
+
+- Add one smoke test for rendering
+- Add one auth or model-level test to prove the harness works
+
+### Acceptance criteria
+
+- The scaffold is ready for feature work
+- Tests run locally and become part of the development baseline
+
+## Phase 3 - Account module: profile and saved address
 
 ### Learner outcomes
 
 - Build authenticated user-facing flows
-- Practice typed client/server communication
-- Model core application data and validation rules
+- Practice strict separation between `View`, `ViewModel`, and `Model`
+- Apply client and server validation to real account data
 
 ### Technical goals
 
-- Introduce `Profile`, `Catalog / Article Selection`, and `Address Form`
-- Define the first real domain models and server procedures
-- Use fetch and typed API access for real application data
-- Organize UI logic with a lightweight MVVM approach
+- Add profile data and one saved address per user
+- Protect all account mutations behind GitHub-authenticated sessions
+- Define account schemas, validation rules, and typed server procedures
+- Build the first full feature using feature-based `MVVM`
 
 ### Deliverables
 
-- Authenticated profile view and edit flow
-- Article listing and selection flow
-- Address form with client and server validation
-- Initial domain schema and related server endpoints or procedures
+- Account page
+- Profile edit flow
+- Saved address create and edit flow
+- Placeholder order-history section for future order data
 
 ### Test expectations
 
-- Add Vitest automated tests for the main happy-path flows
-- Add Vitest validation tests for incorrect or incomplete address data
-- Add Vitest authorization tests for protected profile actions
+- Add `Vitest` validation tests for invalid address data
+- Add authorization tests for protected profile and address mutations
+- Add happy-path tests for reading and updating account data
 
 ### Acceptance criteria
 
-- A signed-in user can view and update profile information
-- A user can browse and select an article
-- Address submission is validated and rejected safely on invalid input
-- Server access is protected and typed
+- A signed-in user can view and update account information
+- A signed-in user can save one validated address
+- Invalid address data is rejected safely
+- The feature follows the required `MVVM` separation
 
-## Phase 3 - UI quality, component library, responsiveness, and stronger validation
+## Phase 4 - Catalog, cart, checkout, and order history
 
 ### Learner outcomes
 
-- Improve implementation quality beyond functional correctness
-- Learn how design systems and responsive behavior affect product delivery
-- Reinforce secure and maintainable frontend patterns
+- Build a complete typed user flow across frontend, API, and database layers
+- Practice state management around cart and checkout behavior
+- Model transactional behavior with clear validation and persistence rules
+
+### Technical goals
+
+- Add a seeded catalog grid from local database data
+- Add persistent cart behavior with increment, decrement, add, and remove actions
+- Add checkout using the saved account address
+- Add local mock payment confirmation
+- Record orders and show them in account order history
+
+### Deliverables
+
+- Catalog listing and detail flow
+- Cart interface
+- Checkout screen
+- Order history integrated into account
+
+### Test expectations
+
+- Add tests for cart mutations and quantity updates
+- Add checkout success and empty-cart rejection tests
+- Add order-history retrieval tests
+
+### Acceptance criteria
+
+- A signed-in user can browse products and manage a cart
+- Checkout creates an accepted local order without an external payment gateway
+- The saved address is used during checkout
+- Order history is visible in the account area
+
+## Phase 5 - UI quality, shared components, and responsiveness
+
+### Learner outcomes
+
+- Improve implementation quality beyond core functionality
+- Learn how a component library supports consistency and speed
+- Strengthen usability on desktop and mobile layouts
 
 ### Technical goals
 
 - Integrate a free component library
-- Improve visual consistency and form usability
-- Strengthen responsive behavior for mobile and desktop
-- Expand state management patterns where the core flows require it
-- Harden validation, error states, and access control
+- Refine navigation, forms, cards, dialogs, and feedback states
+- Improve responsive behavior across account, catalog, cart, and checkout
+- Reduce duplication in the core feature UI
 
 ### Deliverables
 
-- Refined UI for profile, catalog, and form flows
-- Shared components and styling conventions
-- Responsive layouts for key screens
-- Improved validation and error handling behavior
+- Shared UI primitives
+- Improved responsive layouts
+- Better loading, empty, and error states
 
 ### Test expectations
 
-- Add Vitest component and integration tests for major UI states
-- Add responsive scenario checks for the main screens
-- Extend Vitest security-oriented tests around protected data access and invalid inputs
+- Add component and integration tests for major UI states
+- Add responsive sanity checks for the main flows
 
 ### Acceptance criteria
 
-- Core screens remain usable on mobile and desktop layouts
-- Shared components reduce duplication in key flows
-- Error handling is visible, clear, and safe
-- Validation and authorization rules are enforced consistently
+- Core screens remain usable on mobile and desktop
+- Shared components reduce repeated UI code
+- Errors and pending states are visible and safe
 
-## Phase 4 - Stretch features and guided extensions
+## Phase 6 - Map module
 
 ### Learner outcomes
 
-- Explore advanced browser and real-time capabilities
-- Understand the extra architectural complexity introduced by rich media features
-- Practice scoping optional features without destabilizing the core product
+- Integrate a browser mapping feature into an existing domain model
+- Understand how location data interacts with saved address information
 
 ### Technical goals
 
-- Add `Map` integration for location-based interaction
-- Add camera and photo capture support
-- Explore `Media Transfer` for large files such as photos and videos
-- Explore `Video Chat` as an advanced real-time extension
+- Add a map screen using `Leaflet` and `OpenStreetMap`
+- Show a saved location tied to account or order address data
+- Allow simple location selection via map interaction or browser geolocation
 
 ### Deliverables
 
-- Dynamic map proof of concept or integrated module
-- Camera capture workflow for supported devices
-- Media upload or transfer workflow with explicit constraints
-- Video chat spike or prototype
+- Map screen
+- Address-linked marker or coordinate flow
+- Basic fallback behavior for unsupported location access
 
 ### Test expectations
 
-- Add Vitest targeted tests for permissions, failure states, and unsupported environments
-- Add Vitest tests or documented checks for upload constraints and real-time session behavior
-- Keep core flow regression coverage active while stretch features are added
+- Add tests or documented checks for location permission failures
+- Verify the module does not break account or checkout flows
 
 ### Acceptance criteria
 
-- Stretch features remain optional and do not block completion of core scope
-- Each advanced feature is introduced with explicit constraints and fallback behavior
-- Core profile, catalog, and address flows continue to work after stretch additions
+- The map feature is functional and connected to address data
+- Unsupported states fail safely
+
+## Phase 7 - Camera and media transfer module
+
+### Learner outcomes
+
+- Work with browser media APIs and server-side file handling
+- Learn when transport choices should differ between metadata and file bodies
+
+### Technical goals
+
+- Add camera capture support for supported browsers/devices
+- Store uploaded media metadata in the application domain
+- Send file bodies through a dedicated upload route
+- Persist uploaded files to a writable uploads directory
+- Apply moderate-size, demo-friendly upload constraints
+
+### Deliverables
+
+- Camera capture flow
+- Media upload flow
+- Media metadata records linked to users
+
+### Test expectations
+
+- Add tests for unsupported device and permission states
+- Add validation tests for upload constraints and metadata handling
+
+### Acceptance criteria
+
+- A signed-in user can capture or upload supported media
+- The application stores metadata and files safely for the local-first deployment model
+- Failure states are visible and controlled
+
+## Phase 8 - One-to-one video chat
+
+### Learner outcomes
+
+- Build a focused real-time communication feature without over-scaling complexity
+- Understand the signaling and permission concerns of browser video chat
+
+### Technical goals
+
+- Add authenticated one-to-one room creation and join flows
+- Use WebRTC for media streams
+- Use app-level signaling suitable for a local-first MVP
+- Provide basic in-call controls and safe failure handling
+
+### Deliverables
+
+- Room creation and join UI
+- Basic one-to-one call interface
+- Signaling and session records needed for the MVP
+
+### Test expectations
+
+- Add tests for room lifecycle logic
+- Add permission and error-state coverage around camera and microphone access
+
+### Acceptance criteria
+
+- Two authenticated users can create or join a one-to-one call flow
+- The feature remains limited and maintainable for the exam scope
 
 ## Cross-phase rules
 
-- Core features are mandatory before advanced features are treated as committed scope.
-- Testing is part of every phase.
-- Vitest is the default framework for automated tests across phases.
-- Security work starts with the first real user flows and continues through all later phases.
-- New architectural decisions should be documented with additional ADRs when they materially affect delivery or structure.
+- `MVVM` is mandatory across all implemented features.
+- The project remains one application with multiple required modules.
+- `Vitest` is the default automated test framework across phases.
+- Core account and catalog flows must be completed before later required modules are treated as in scope for implementation.
+- Security starts with the first authenticated features and continues through all later phases.
+- Major structural or architectural changes should be captured in additional ADRs.

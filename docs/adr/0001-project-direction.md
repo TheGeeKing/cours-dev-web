@@ -5,120 +5,131 @@
 
 ## Context
 
-This repository started as a generic T3-style starter application. That baseline provides authentication, data access, server procedures, and a frontend shell, but it does not yet describe the educational goal of the project or the product direction the team should follow.
+This repository started from a generic T3-style scaffold. The baseline already provides authentication, database access, typed server procedures, and a frontend shell, but it does not define the real purpose of the project.
 
-The module brief calls for practical work that helps learners:
+The exam brief requires multiple practical features, including profile work, catalog interactions, address handling, component usage, map integration, camera and media handling, and video chat. Some of these modules naturally connect. Others are included because the exam requires them and should not force the project into an artificial single-product story.
 
-- use version control in context
-- produce quality mockups and interface work
-- integrate automated tests with a simple and consistent workflow
+Without an explicit direction, the repository could drift into:
 
-The brief also suggests realistic features such as profile management, article selection, address forms, component library usage, dynamic maps, camera capture, large file transfer, and video chat.
+- a generic starter demo
+- a collection of disconnected experiments
+- an over-designed product narrative that makes required modules feel unnatural
 
-Without an explicit direction, the repository could drift into either a generic demo app or a collection of unrelated experiments. The team needs a planning baseline that explains:
+The project needs a planning baseline that explains:
 
-- why this project exists
+- why the repository exists
+- which modules come first
+- how required later modules fit into the plan
 - why the current stack is kept
-- which features are core
-- which features are stretch goals
-- how the architecture should be taught and extended
+- which architecture rule is mandatory during implementation
 
 ## Decision
 
-We will use this repository as a learner-oriented web application sandbox with phased delivery.
+We will use this repository as a modular exam web application delivered in phases.
 
 ### Product framing
 
-The project is intentionally framed as a learning sandbox rather than a narrowly fixed B2C product. This gives the team enough freedom to practice several applied web scenarios while still working inside one coherent codebase.
+The application is one codebase containing several required modules. The project does not need a perfectly coherent business story across every feature. Instead, it should stay believable where that helps and pragmatic where the exam requires technically unrelated modules.
 
-The sandbox will center on realistic user flows:
+The first core product flow will connect:
 
-- authenticated profile management
-- article display and selection
-- validated address submission
-- client and server data fetching
-- responsive layouts
-- secure backend access and validation
+- GitHub-authenticated account access
+- profile and saved address management
+- seeded catalog browsing
+- cart management with quantity changes
+- checkout with a locally accepted payment action
+- order history inside the user account
+
+Later required modules will then extend the same application:
+
+- map integration
+- camera capture
+- media transfer
+- one-to-one video chat
+
+These later modules are required phases, not optional stretch ideas.
 
 ### Stack baseline
 
-We keep the current stack as the official project baseline:
+We keep the current stack as the official technical baseline:
 
-- Next.js App Router for application structure and server/client boundaries
-- React for interactive UI
-- tRPC for typed server procedures
-- React Query for client-side data fetching and cache management
-- Drizzle ORM for database access and schema evolution
-- Better Auth for authentication and session handling
-- Tailwind CSS and TypeScript for implementation speed and consistency
+- Next.js App Router
+- React
+- TypeScript
+- tRPC
+- React Query
+- Drizzle ORM
+- Better Auth
+- Tailwind CSS
 
-This is a deliberate constraint. The project should practice product and engineering decisions on top of a stable baseline instead of spending time re-evaluating the stack.
+This is a deliberate constraint. The learning value comes from building on top of a stable foundation instead of restarting stack selection.
 
 ### Scope conventions
 
-Core scope is mandatory:
+Core implementation scope comes first:
 
-- `Profile`
-- `Catalog / Article Selection`
-- `Address Form`
-- fetch and API usage
+- account / profile
+- one saved address
+- catalog
+- cart
+- checkout
+- order history
+- typed fetch and API usage
 - state management
 - responsive UI
 - security
 
-Stretch scope is planned for later phases:
+Required later scope comes after the core release is stable:
 
-- `Map`
-- camera and photo capture
-- `Media Transfer`
-- `Video Chat`
+- map
+- camera
+- media transfer
+- one-to-one video chat
 
-Core features must be completed before stretch features are treated as committed implementation work.
+Later required modules must not delay the initial core milestone, but they are still part of the committed roadmap.
 
-### Architecture teaching pattern
+### Authentication baseline
 
-The frontend will use a lightweight MVVM interpretation:
+GitHub OAuth is the first-class sign-in method for the project. This keeps the implementation aligned with the current authentication setup and provides a concrete authenticated user identity for the account, cart, order, media, and video features.
 
-- Views: pages, layouts, and presentational components
-- View-models: hooks, form state, query state, mutation handlers, and orchestration logic
-- Models: database schema, server procedures, domain services, and typed data contracts
+### Architecture baseline
 
-This pattern is intended as a teaching aid, not as a rigid framework. It gives learners a simple way to separate UI rendering, user interaction logic, and data/domain behavior inside the existing Next.js structure.
+`MVVM` is mandatory for this project. The specific structure is documented in ADR 0002, but the decision is established here as a project-wide rule rather than an optional teaching aid.
 
 ### Planning conventions
 
-- The repository remains one coherent application, not a set of disconnected mini-projects.
+- The repository remains one maintainable application.
+- Modules may be loosely connected if the exam scope requires it.
 - Strong automated testing is a project goal from the start.
-- Vitest is the default automated testing framework for this project.
-- Security applies from the core phase onward through authentication, authorization, server-side validation, and controlled data access.
-- Future runtime APIs and database models may change during implementation, but this document defines the planning baseline and sequencing rules now.
+- `Vitest` is the default automated test framework.
+- Security applies from the first real user flows onward.
+- Architectural changes that materially affect delivery should be recorded with additional ADRs.
 
 ## Consequences
 
 ### Positive consequences
 
-- The repo gains a clear educational purpose.
-- The team can align implementation choices with learning outcomes.
-- Scope is easier to manage because core work is separated from stretch work.
-- The current stack can be used to teach typed full-stack development without additional platform churn.
-- Documentation becomes a stable reference for future feature ADRs.
+- The project gains a realistic implementation order tied to the exam goals.
+- The team can work module by module without losing architectural consistency.
+- The first delivery milestone becomes concrete and testable.
+- Later required modules are acknowledged early without destabilizing the initial build.
 
 ### Tradeoffs
 
-- The project is less open-ended than a pure experimentation repo.
-- Some advanced ideas will be intentionally delayed even if they are attractive technically.
-- The team commits to maintaining architecture and roadmap documentation as implementation evolves.
+- Not every module will share a perfect product narrative.
+- Advanced modules are intentionally delayed even though they are required.
+- Documentation must stay current as the implementation grows.
 
 ## Alternatives considered
 
 ### Keep the repo as a generic starter
 
-Rejected because it does not explain the module goals, the delivery order, or the expected learning outcomes.
+Rejected because it does not describe the actual project goals, scope ordering, or exam requirements.
 
-### Define a strict single-product commerce application
+### Force every module into one strict product story
 
-Rejected because it would narrow the teaching scope too early and make some suggested module exercises feel artificial.
+Rejected because some required modules, especially media and video, would feel artificial and drive poor product decisions.
 
-### Re-evaluate the technical stack before planning
+### Re-evaluate the technical stack before implementation
 
-Rejected because the existing stack already supports the target learning goals and provides a usable baseline for immediate iteration.
+Rejected because the existing stack already supports the required learning and delivery goals.

@@ -1,77 +1,118 @@
-# Web Application Learning Sandbox
+# Modular Exam Web Application
 
-This repository is a learner-oriented web application project used to practice modern full-stack web development in a structured way. It starts from a T3-style scaffold, but the goal is no longer to demonstrate the starter itself. The goal is to grow this repo into a realistic training project with documented decisions, phased delivery, and room for stretch features.
+This repository is an exam-oriented full-stack web application built from a T3-style baseline and reshaped into a modular delivery project. The goal is not to keep a generic starter alive. The goal is to implement the required module features in a controlled order, document key decisions, and apply a strict `MVVM` architecture while shipping a working application.
 
-## Why this project exists
+## Project intent
 
-The project supports hands-on practice around the module goals:
+The application is one codebase with several required modules. Some modules connect naturally, such as account, address, cart, checkout, and order history. Others exist because the exam requires them and do not need a forced product story.
 
-- use version control in a real project
-- produce quality UI mockups and integrations
-- add automated tests with Vitest as features are introduced
-- work on common product flows such as profile management, article selection, and validated forms
-- learn how frontend and backend concerns connect in a secure, responsive application
+The guiding rule is:
 
-## Current state
+- one application
+- several required modules
+- phased delivery
+- explicit architecture decisions
+- small, reviewable implementation steps
 
-The repository currently contains a minimal working baseline with:
+## Stack baseline
+
+The current technical stack remains the official baseline:
 
 - Next.js App Router
 - React 19
+- TypeScript
 - tRPC
 - React Query
 - Drizzle ORM
 - Better Auth
 - Tailwind CSS
-- TypeScript
+- SQLite / libSQL
 
-This baseline is intentionally kept as the project constraint so the team can focus on feature design, architecture, and delivery rather than restarting the stack selection from scratch.
+This stack is intentionally kept so the project can focus on implementation, architecture, and testing rather than re-evaluating platform choices.
 
-## Planned learning scope
+## Required architecture rule
 
-### Core scope
+`MVVM` is mandatory for this project.
 
-- Profile management
-- Article listing, display, and selection
-- Address form and validation
-- Fetch and API integration
-- State management
-- Lightweight MVVM-style frontend organization
-- Responsive design
-- Security through authentication, validation, and controlled server access
+The project uses feature-based `MVVM`, not a loose interpretation and not a single global layers-only folder structure. Each feature must clearly separate:
 
-### Stretch scope
+- `View`: pages, screens, layouts, and presentational components
+- `ViewModel`: hooks and orchestration logic for UI state, queries, mutations, and forms
+- `Model`: schema, validation, server procedures, domain rules, and typed contracts
 
-- Dynamic map integration
-- Camera and photo capture
-- Large photo and video file transfer
-- Video chat
+See the architecture decisions for the official rules:
 
-## Documentation
-
-- [Project direction MADR](docs/adr/0001-project-direction.md)
+- [Project direction ADR](docs/adr/0001-project-direction.md)
+- [Feature-based MVVM ADR](docs/adr/0002-feature-based-mvvm.md)
 - [Implementation roadmap](docs/roadmap.md)
 
-These documents explain why the project exists, what will be delivered first, what is optional later, and how the current technical stack supports the learning path.
+## Delivery sequence
 
-## Planned modules
+The planned delivery order is:
 
-The documentation defines the future project around these modules:
+1. Documentation reset and architectural baseline
+2. Engineering baseline cleanup and test setup
+3. Account module with profile and one saved address
+4. Catalog, cart, checkout, and order history
+5. UI quality, shared components, and responsiveness
+6. Map module
+7. Camera and media transfer module
+8. One-to-one video chat module
 
-- `Profile`
-- `Catalog / Article Selection`
-- `Address Form`
+The later modules are required phases, not optional stretch work. They come after the core account and catalog flows because those flows are the safest base for the rest of the application.
+
+## Core product flow
+
+The main end-to-end flow for the first implementation milestones is:
+
+- sign in with GitHub
+- browse a seeded catalog grid
+- increment or decrement quantities
+- manage a cart
+- confirm checkout with a saved address
+- accept payment through a local mock payment action
+- review order history from the user account
+
+Payment is intentionally local and simulated. No external payment provider is required for the core scope.
+
+## Module roadmap
+
+### Core modules
+
+- `Account / Profile`
+- `Saved Address`
+- `Catalog`
+- `Cart`
+- `Checkout`
+- `Order History`
+
+### Required later modules
+
 - `Map`
+- `Camera`
 - `Media Transfer`
-- `Video Chat`
+- `1-to-1 Video Chat`
 
-Not all modules will be implemented at once. Core modules are mandatory. Advanced modules are planned as stretch phases.
+## Testing strategy
 
-## Development approach
+- `Vitest` is the default automated test runner
+- testing starts early and grows with each phase
+- core flows must be covered before advanced modules are considered complete
+- authorization, validation, and unsupported browser/device states are part of the expected test surface
 
-- Keep the current stack and extend it incrementally
-- Document key decisions before major implementation work
-- Build core flows before advanced media features
-- Use Vitest as the default automated test framework for planned tests
-- Treat testing as part of each phase, not as a final cleanup task
-- Use the project to practice both product thinking and technical execution
+## Local-first assumptions
+
+The project is designed for local demonstration first and can later be adapted to a self-hosted Docker or VPS deployment.
+
+Planned implementation defaults:
+
+- GitHub OAuth as the first-class sign-in path
+- seeded database data for the catalog
+- one saved address per user in the core flow
+- dedicated upload route for file bodies
+- filesystem-backed uploads in a dedicated writable folder
+- moderate media handling appropriate for an exam demo, not production-scale uploads
+
+## Current state
+
+The repository currently still contains much of the original scaffold baseline. The roadmap and ADRs define the target implementation order, but most product modules are not implemented yet.
