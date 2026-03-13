@@ -1,29 +1,76 @@
-# Create T3 App
+# Web Application Learning Sandbox
 
-This is a [T3 Stack](https://create.t3.gg/) project bootstrapped with `create-t3-app`.
+This repository is a learner-oriented web application project used to practice modern full-stack web development in a structured way. It starts from a T3-style scaffold, but the goal is no longer to demonstrate the starter itself. The goal is to grow this repo into a realistic training project with documented decisions, phased delivery, and room for stretch features.
 
-## What's next? How do I make an app with this?
+## Why this project exists
 
-We try to keep this project as simple as possible, so you can start with just the scaffolding we set up for you, and add additional things later when they become necessary.
+The project supports hands-on practice around the module goals:
 
-If you are not familiar with the different technologies used in this project, please refer to the respective docs. If you still are in the wind, please join our [Discord](https://t3.gg/discord) and ask for help.
+- use version control in a real project
+- produce quality UI mockups and integrations
+- add automated tests as features are introduced
+- work on common product flows such as profile management, article selection, and validated forms
+- learn how frontend and backend concerns connect in a secure, responsive application
 
-- [Next.js](https://nextjs.org)
-- [NextAuth.js](https://next-auth.js.org)
-- [Prisma](https://prisma.io)
-- [Drizzle](https://orm.drizzle.team)
-- [Tailwind CSS](https://tailwindcss.com)
-- [tRPC](https://trpc.io)
+## Current state
 
-## Learn More
+The repository currently contains a minimal working baseline with:
 
-To learn more about the [T3 Stack](https://create.t3.gg/), take a look at the following resources:
+- Next.js App Router
+- React 19
+- tRPC
+- React Query
+- Drizzle ORM
+- Better Auth
+- Tailwind CSS
+- TypeScript
 
-- [Documentation](https://create.t3.gg/)
-- [Learn the T3 Stack](https://create.t3.gg/en/faq#what-learning-resources-are-currently-available) — Check out these awesome tutorials
+This baseline is intentionally kept as the project constraint so the team can focus on feature design, architecture, and delivery rather than restarting the stack selection from scratch.
 
-You can check out the [create-t3-app GitHub repository](https://github.com/t3-oss/create-t3-app) — your feedback and contributions are welcome!
+## Planned learning scope
 
-## How do I deploy this?
+### Core scope
 
-Follow our deployment guides for [Vercel](https://create.t3.gg/en/deployment/vercel), [Netlify](https://create.t3.gg/en/deployment/netlify) and [Docker](https://create.t3.gg/en/deployment/docker) for more information.
+- Profile management
+- Article listing, display, and selection
+- Address form and validation
+- Fetch and API integration
+- State management
+- Lightweight MVVM-style frontend organization
+- Responsive design
+- Security through authentication, validation, and controlled server access
+
+### Stretch scope
+
+- Dynamic map integration
+- Camera and photo capture
+- Large photo and video file transfer
+- Video chat
+
+## Documentation
+
+- [Project direction MADR](docs/adr/0001-project-direction.md)
+- [Implementation roadmap](docs/roadmap.md)
+
+These documents explain why the project exists, what will be delivered first, what is optional later, and how the current technical stack supports the learning path.
+
+## Planned modules
+
+The documentation defines the future project around these modules:
+
+- `Profile`
+- `Catalog / Article Selection`
+- `Address Form`
+- `Map`
+- `Media Transfer`
+- `Video Chat`
+
+Not all modules will be implemented at once. Core modules are mandatory. Advanced modules are planned as stretch phases.
+
+## Development approach
+
+- Keep the current stack and extend it incrementally
+- Document key decisions before major implementation work
+- Build core flows before advanced media features
+- Treat testing as part of each phase, not as a final cleanup task
+- Use the project to practice both product thinking and technical execution
