@@ -5,14 +5,16 @@ import { redirect } from "next/navigation";
 import { LatestPost } from "@/app/_components/post";
 import { auth } from "@/server/better-auth";
 import { getSession } from "@/server/better-auth/server";
-import { api, HydrateClient } from "@/trpc/server";
+import { caller, getQueryClient, HydrateClient, trpc } from "@/trpc/server";
 
 export default async function Home() {
-	const hello = await api.post.hello({ text: "from tRPC" });
+	const hello = await caller.post.hello({ text: "from tRPC" });
 	const session = await getSession();
 
 	if (session) {
-		void api.post.getLatest.prefetch();
+		void getQueryClient().prefetchQuery(
+			trpc.post.getLatest.queryOptions(undefined),
+		);
 	}
 
 	return (
@@ -72,6 +74,7 @@ export default async function Home() {
 											}
 											redirect(res.url);
 										}}
+										type="submit"
 									>
 										Sign in with Github
 									</button>
@@ -87,6 +90,7 @@ export default async function Home() {
 											});
 											redirect("/");
 										}}
+										type="submit"
 									>
 										Sign out
 									</button>
