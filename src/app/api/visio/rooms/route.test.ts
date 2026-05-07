@@ -47,7 +47,7 @@ describe("POST /api/visio/rooms", () => {
 
 		expect(response.status).toBe(401);
 		await expect(response.json()).resolves.toEqual({
-			error: "Sign in before creating a visio room.",
+			error: "Connectez-vous avant de créer un salon visio.",
 		});
 	});
 

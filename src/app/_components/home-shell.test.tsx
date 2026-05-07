@@ -7,25 +7,25 @@ describe("HomeShell", () => {
 	it("renders the core app shell content", () => {
 		render(
 			<HomeShell
-				authAction={<button type="button">Sign in with GitHub</button>}
+				authAction={<button type="button">Se connecter avec GitHub</button>}
 				isSignedIn={false}
-				sessionDescription="The baseline is ready for protected flows."
-				sessionLabel="Sign in to start"
+				sessionDescription="Connectez-vous pour utiliser toutes les fonctionnalités de l'application"
+				sessionLabel="Connectez-vous pour commencer"
 			/>,
 		);
 
 		expect(
 			screen.getByRole("heading", {
-				name: "From scaffold to a real exam application.",
+				name: "Projet Cours Application Web",
 			}),
 		).toBeInTheDocument();
-		expect(screen.getByText("Core milestones")).toBeInTheDocument();
-		expect(screen.getByText("Required later modules")).toBeInTheDocument();
-		expect(screen.getByText("Accessible routes")).toBeInTheDocument();
+		expect(screen.getByText("Objectifs de base")).toBeInTheDocument();
+		expect(screen.getByText("Objectifs bonus")).toBeInTheDocument();
+		expect(screen.getByText("Routes accessibles")).toBeInTheDocument();
 		expect(screen.getByText("/transfer")).toBeInTheDocument();
-		expect(screen.getAllByText("Sign in required")).toHaveLength(2);
+		expect(screen.getAllByText("Connexion requise")).toHaveLength(2);
 		expect(
-			screen.getByRole("button", { name: "Sign in with GitHub" }),
+			screen.getByRole("button", { name: "Se connecter avec GitHub" }),
 		).toBeInTheDocument();
 	});
 });

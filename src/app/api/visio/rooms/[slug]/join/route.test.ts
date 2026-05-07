@@ -58,10 +58,13 @@ describe("POST /api/visio/rooms/[slug]/join", () => {
 		});
 
 		const { POST } = await import("./route");
-		const request = new Request("http://localhost/api/visio/rooms/room-slug/join", {
-			method: "POST",
-			body: JSON.stringify({}),
-		});
+		const request = new Request(
+			"http://localhost/api/visio/rooms/room-slug/join",
+			{
+				method: "POST",
+				body: JSON.stringify({}),
+			},
+		);
 
 		const response = await POST(request, {
 			params: Promise.resolve({ slug: "room-slug" }),

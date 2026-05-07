@@ -43,8 +43,8 @@ type StoredVisioEventPayload =
 	| ({
 			participant: VisioParticipantSummary;
 	  } & Omit<VisioSignalPayload, "signalType"> & {
-			signalType: VisioSignalPayload["signalType"];
-	  });
+				signalType: VisioSignalPayload["signalType"];
+			});
 
 const visioIceServerSchema = z.object({
 	urls: z.union([z.string(), z.array(z.string()).min(1)]),
@@ -66,10 +66,7 @@ const buildParticipantSummary = (
 	status: record.status as VisioParticipantStatus,
 });
 
-const buildRoomSummary = (
-	room: VisioRoomRecord,
-	settingsLocked: boolean,
-) => ({
+const buildRoomSummary = (room: VisioRoomRecord, settingsLocked: boolean) => ({
 	slug: room.roomSlug,
 	sharePath: buildVisioRoomPath(room.roomSlug),
 	hostDisplayName: room.hostDisplayName,
@@ -102,11 +99,11 @@ const isRoomEnded = (room: Pick<VisioRoomRecord, "endedAt">) =>
 
 const ensureRoomIsOpen = (room: VisioRoomRecord, now: Date) => {
 	if (isRoomExpired(room, now)) {
-		throw new VisioError("This room has expired.", 410, "EXPIRED");
+		throw new VisioError("Ce salon a expiré.", 410, "EXPIRED");
 	}
 
 	if (isRoomEnded(room)) {
-		throw new VisioError("This room has already ended.", 410, "CONFLICT");
+		throw new VisioError("Ce salon est déjà terminé.", 410, "CONFLICT");
 	}
 };
 
@@ -193,7 +190,7 @@ const parseStoredEvent = (record: VisioEventRecord): VisioRoomEvent => {
 			} as VisioRoomEvent;
 		default:
 			throw new VisioError(
-				`Unsupported visio event type "${record.type}".`,
+				`Type d'événement visio non pris en charge : "${record.type}".`,
 				500,
 				"INTERNAL_ERROR",
 			);
@@ -221,7 +218,11 @@ const appendRoomEvent = async (input: {
 		.returning();
 
 	if (!record) {
-		throw new VisioError("The room event could not be saved.", 500, "INTERNAL_ERROR");
+		throw new VisioError(
+			"L'événement du salon n'a pas pu être enregistré.",
+			500,
+			"INTERNAL_ERROR",
+		);
 	}
 
 	return record;
@@ -238,10 +239,7 @@ const getRoomBySlug = async (slug: string) => {
 };
 
 const getParticipantsForRoom = async (roomId: string) =>
-	db
-		.select()
-		.from(visioParticipant)
-		.where(eq(visioParticipant.roomId, roomId));
+	db.select().from(visioParticipant).where(eq(visioParticipant.roomId, roomId));
 
 const getParticipantById = async (roomId: string, participantId: string) => {
 	const [participant] = await db
@@ -258,7 +256,10 @@ const getParticipantById = async (roomId: string, participantId: string) => {
 	return participant ?? null;
 };
 
-const getParticipantByToken = async (roomId: string, token: string | null | undefined) => {
+const getParticipantByToken = async (
+	roomId: string,
+	token: string | null | undefined,
+) => {
 	if (!token) {
 		return null;
 	}
@@ -297,7 +298,10 @@ const resolveActingParticipant = async (input: {
 	viewerUserId?: string | null;
 	participantToken?: string | null;
 }) => {
-	const byToken = await getParticipantByToken(input.room.id, input.participantToken);
+	const byToken = await getParticipantByToken(
+		input.room.id,
+		input.participantToken,
+	);
 	if (byToken) {
 		return byToken;
 	}
@@ -361,7 +365,10 @@ export const getVisioIceServers = (): VisioIceServer[] => {
 		);
 		return parsed;
 	} catch (error) {
-		console.error("Invalid VISIO_ICE_SERVERS_JSON, falling back to STUN", error);
+		console.error(
+			"Invalid VISIO_ICE_SERVERS_JSON, falling back to STUN",
+			error,
+		);
 		return [...VISIO_DEFAULT_ICE_SERVERS];
 	}
 };
@@ -391,7 +398,11 @@ export const createVisioRoom = async (input: {
 		.returning();
 
 	if (!room) {
-		throw new VisioError("The room could not be created.", 500, "INTERNAL_ERROR");
+		throw new VisioError(
+			"Le salon n'a pas pu être créé.",
+			500,
+			"INTERNAL_ERROR",
+		);
 	}
 
 	await db.insert(visioParticipant).values({
@@ -435,13 +446,17 @@ export const updateVisioRoomSettings = async (input: {
 	const room = await getRoomBySlug(input.slug);
 
 	if (!room) {
-		throw new VisioError("This room was not found.", 404, "NOT_FOUND");
+		throw new VisioError("Ce salon est introuvable.", 404, "NOT_FOUND");
 	}
 
 	ensureRoomIsOpen(room, now);
 
 	if (room.hostUserId !== input.hostUserId) {
-		throw new VisioError("Only the host can edit room settings.", 403, "FORBIDDEN");
+		throw new VisioError(
+			"Seul l'hôte peut modifier les réglages du salon.",
+			403,
+			"FORBIDDEN",
+		);
 	}
 
 	const hostParticipant = await resolveActingParticipant({
@@ -451,13 +466,17 @@ export const updateVisioRoomSettings = async (input: {
 	});
 
 	if (!hostParticipant || hostParticipant.role !== "host") {
-		throw new VisioError("Host access is required for this action.", 401, "UNAUTHORIZED");
+		throw new VisioError(
+			"L'accès hôte est requis pour cette action.",
+			401,
+			"UNAUTHORIZED",
+		);
 	}
 
 	const participants = await getParticipantsForRoom(room.id);
 	if (hasGuestRequest(participants)) {
 		throw new VisioError(
-			"Room settings lock after the first guest request.",
+			"Les réglages du salon se verrouillent après la première demande d'invité.",
 			409,
 			"CONFLICT",
 		);
@@ -554,16 +573,17 @@ export const getVisioRoomPageState = async (input: {
 	}
 
 	if (viewerParticipant?.status === "active") {
+		const peer = getPeerForParticipant(participants, viewerParticipant);
+		const pendingGuest = getPendingGuest(participants);
+
 		return {
 			status: "in_call",
 			room: roomSummary,
 			self: buildParticipantSummary(viewerParticipant),
-			peer: getPeerForParticipant(participants, viewerParticipant)
-				? buildParticipantSummary(getPeerForParticipant(participants, viewerParticipant)!)
-				: null,
+			peer: peer ? buildParticipantSummary(peer) : null,
 			pendingGuest:
-				viewerParticipant.role === "host" && getPendingGuest(participants)
-					? buildParticipantSummary(getPendingGuest(participants)!)
+				viewerParticipant.role === "host" && pendingGuest
+					? buildParticipantSummary(pendingGuest)
 					: null,
 		};
 	}
@@ -596,13 +616,17 @@ export const joinVisioRoom = async (input: {
 	const room = await getRoomBySlug(input.slug);
 
 	if (!room) {
-		throw new VisioError("This room was not found.", 404, "NOT_FOUND");
+		throw new VisioError("Ce salon est introuvable.", 404, "NOT_FOUND");
 	}
 
 	ensureRoomIsOpen(room, now);
 
 	if (room.requireJoinAuth && !input.linkedUserId) {
-		throw new VisioError("Sign in before joining this room.", 401, "UNAUTHORIZED");
+		throw new VisioError(
+			"Connectez-vous avant de rejoindre ce salon.",
+			401,
+			"UNAUTHORIZED",
+		);
 	}
 
 	const existingParticipant = await getParticipantByToken(
@@ -615,7 +639,7 @@ export const joinVisioRoom = async (input: {
 			existingParticipant.status === "pending")
 	) {
 		throw new VisioError(
-			"You already have an active room session in this browser.",
+			"Vous avez déjà une session active dans ce salon avec ce navigateur.",
 			409,
 			"CONFLICT",
 		);
@@ -624,7 +648,7 @@ export const joinVisioRoom = async (input: {
 	const participants = await getParticipantsForRoom(room.id);
 	if (getCurrentGuestRequest(participants)) {
 		throw new VisioError(
-			"This room already has an active guest session.",
+			"Ce salon a déjà une session invité active.",
 			409,
 			"CONFLICT",
 		);
@@ -650,7 +674,11 @@ export const joinVisioRoom = async (input: {
 		.returning();
 
 	if (!participant) {
-		throw new VisioError("This room could not add the guest.", 500, "INTERNAL_ERROR");
+		throw new VisioError(
+			"Ce salon n'a pas pu ajouter l'invité.",
+			500,
+			"INTERNAL_ERROR",
+		);
 	}
 
 	await updateRoomActivity(room.id, now);
@@ -689,13 +717,17 @@ export const reviewVisioGuestAdmission = async (input: {
 	const room = await getRoomBySlug(input.slug);
 
 	if (!room) {
-		throw new VisioError("This room was not found.", 404, "NOT_FOUND");
+		throw new VisioError("Ce salon est introuvable.", 404, "NOT_FOUND");
 	}
 
 	ensureRoomIsOpen(room, now);
 
 	if (room.hostUserId !== input.hostUserId) {
-		throw new VisioError("Only the host can review guests.", 403, "FORBIDDEN");
+		throw new VisioError(
+			"Seul l'hôte peut examiner les invités.",
+			403,
+			"FORBIDDEN",
+		);
 	}
 
 	const hostParticipant = await resolveActingParticipant({
@@ -705,17 +737,28 @@ export const reviewVisioGuestAdmission = async (input: {
 	});
 
 	if (!hostParticipant || hostParticipant.role !== "host") {
-		throw new VisioError("Host access is required for this action.", 401, "UNAUTHORIZED");
+		throw new VisioError(
+			"L'accès hôte est requis pour cette action.",
+			401,
+			"UNAUTHORIZED",
+		);
 	}
 
-	const targetParticipant = await getParticipantById(room.id, input.participantId);
+	const targetParticipant = await getParticipantById(
+		room.id,
+		input.participantId,
+	);
 	if (!targetParticipant || targetParticipant.role !== "guest") {
-		throw new VisioError("This guest request does not exist.", 404, "NOT_FOUND");
+		throw new VisioError(
+			"Cette demande d'invité n'existe pas.",
+			404,
+			"NOT_FOUND",
+		);
 	}
 
 	if (targetParticipant.status !== "pending") {
 		throw new VisioError(
-			"This guest request can no longer be reviewed.",
+			"Cette demande d'invité ne peut plus être examinée.",
 			409,
 			"CONFLICT",
 		);
@@ -736,7 +779,7 @@ export const reviewVisioGuestAdmission = async (input: {
 
 	if (!updatedParticipant) {
 		throw new VisioError(
-			"The guest request could not be updated.",
+			"La demande d'invité n'a pas pu être mise à jour.",
 			500,
 			"INTERNAL_ERROR",
 		);
@@ -786,7 +829,7 @@ export const sendVisioSignal = async (input: {
 	const room = await getRoomBySlug(input.slug);
 
 	if (!room) {
-		throw new VisioError("This room was not found.", 404, "NOT_FOUND");
+		throw new VisioError("Ce salon est introuvable.", 404, "NOT_FOUND");
 	}
 
 	ensureRoomIsOpen(room, now);
@@ -798,26 +841,31 @@ export const sendVisioSignal = async (input: {
 	});
 
 	if (!actor) {
-		throw new VisioError("You are not allowed to signal this room.", 401, "UNAUTHORIZED");
+		throw new VisioError(
+			"Vous n'êtes pas autorisé à signaler ce salon.",
+			401,
+			"UNAUTHORIZED",
+		);
 	}
 
 	if (actor.status !== "active") {
 		throw new VisioError(
-			"Only active participants can exchange call signals.",
+			"Seuls les participants actifs peuvent échanger des signaux d'appel.",
 			409,
 			"CONFLICT",
 		);
 	}
 
 	const participants = await getParticipantsForRoom(room.id);
-	const recipient = participants.find(
-		(participant) =>
-			participant.id !== actor.id && participant.status === "active",
-	) ?? null;
+	const recipient =
+		participants.find(
+			(participant) =>
+				participant.id !== actor.id && participant.status === "active",
+		) ?? null;
 
 	if (!recipient) {
 		throw new VisioError(
-			"No other active participant is available yet.",
+			"Aucun autre participant actif n'est encore disponible.",
 			409,
 			"CONFLICT",
 		);
@@ -851,7 +899,7 @@ export const leaveVisioRoom = async (input: {
 	const room = await getRoomBySlug(input.slug);
 
 	if (!room) {
-		throw new VisioError("This room was not found.", 404, "NOT_FOUND");
+		throw new VisioError("Ce salon est introuvable.", 404, "NOT_FOUND");
 	}
 
 	ensureRoomIsOpen(room, now);
@@ -863,7 +911,11 @@ export const leaveVisioRoom = async (input: {
 	});
 
 	if (!actor) {
-		throw new VisioError("You are not part of this room.", 401, "UNAUTHORIZED");
+		throw new VisioError(
+			"Vous ne faites pas partie de ce salon.",
+			401,
+			"UNAUTHORIZED",
+		);
 	}
 
 	if (actor.role === "host") {
@@ -917,7 +969,7 @@ export const leaveVisioRoom = async (input: {
 
 	if (!updatedParticipant) {
 		throw new VisioError(
-			"The participant could not leave the room.",
+			"Le participant n'a pas pu quitter le salon.",
 			500,
 			"INTERNAL_ERROR",
 		);
@@ -947,7 +999,7 @@ export const getVisioStreamContext = async (input: {
 	const room = await getRoomBySlug(input.slug);
 
 	if (!room) {
-		throw new VisioError("This room was not found.", 404, "NOT_FOUND");
+		throw new VisioError("Ce salon est introuvable.", 404, "NOT_FOUND");
 	}
 
 	ensureRoomIsOpen(room, now);
@@ -959,7 +1011,11 @@ export const getVisioStreamContext = async (input: {
 	});
 
 	if (!participant) {
-		throw new VisioError("You are not allowed to stream this room.", 401, "UNAUTHORIZED");
+		throw new VisioError(
+			"Vous n'êtes pas autorisé à écouter le flux de ce salon.",
+			401,
+			"UNAUTHORIZED",
+		);
 	}
 
 	await touchParticipantPresence(participant.id, now);

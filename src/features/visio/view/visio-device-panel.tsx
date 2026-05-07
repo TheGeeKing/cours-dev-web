@@ -2,6 +2,8 @@
 
 import type { RefObject } from "react";
 
+import { Button, Field, Panel, SectionHeader, Select } from "@/shared/ui";
+
 type DeviceOption = {
 	deviceId: string;
 	label: string;
@@ -44,77 +46,84 @@ export function VisioDevicePanel(props: {
 }) {
 	const previewButtonLabel =
 		props.previewStatus === "requesting"
-			? "Requesting access..."
+			? "Demande d'accès..."
 			: props.hasLocalMedia
-				? "Restart preview"
-				: "Start preview";
+				? "Relancer l'aperçu"
+				: "Démarrer l'aperçu";
 
 	const previewStatusText =
 		props.previewStatus === "requesting"
-			? "Browser permissions are being requested."
+			? "Les autorisations du navigateur sont en cours de demande."
 			: props.previewStatus === "unsupported"
-				? "Camera and microphone access are not available in this browser."
+				? "L'accès à la caméra et au microphone n'est pas disponible dans ce navigateur."
 				: props.hasLocalMedia
-					? "Preview live. Your device choices will carry into the call."
-					: "Preview stays off until you ask for it.";
+					? "Aperçu actif. Vos choix de périphériques seront conservés pour l'appel."
+					: "L'aperçu reste désactivé tant que vous ne le demandez pas.";
 
-	const getMissingDeviceMessage = (kind: "camera" | "microphone" | "speaker") => {
+	const getMissingDeviceMessage = (
+		kind: "camera" | "microphone" | "speaker",
+	) => {
 		if (kind === "speaker" && !props.isSpeakerSelectionSupported) {
-			return "Speaker output switching is not supported by this mobile browser.";
+			return "Le changement de sortie audio n'est pas pris en charge par ce navigateur mobile.";
 		}
 
 		if (!props.hasRequestedDeviceAccess) {
-			return `Tap Start preview first so the browser can expose your ${kind} list.`;
+			const label =
+				kind === "camera"
+					? "caméras"
+					: kind === "microphone"
+						? "microphones"
+						: "haut-parleurs";
+			return `Démarrez d'abord l'aperçu pour que le navigateur puisse afficher la liste des ${label}.`;
 		}
 
-		return `This browser still is not exposing a ${kind} list right now. Preview can still use the default device if permission is granted.`;
+		return "Ce navigateur n'expose pas encore cette liste de périphériques. L'aperçu peut tout de même utiliser le périphérique par défaut si l'autorisation est accordée.";
 	};
 
 	return (
-		<section className="rounded-[1.75rem] border border-stone-900/10 bg-white p-6 shadow-[0_18px_48px_rgba(41,37,36,0.08)]">
+		<Panel>
 			<div className="flex flex-wrap items-start justify-between gap-4">
-				<div>
-					<p className="font-semibold text-emerald-700 text-sm uppercase tracking-[0.3em]">
-						Device check
-					</p>
-					<h2 className="mt-3 font-black text-3xl text-stone-950 tracking-tight">
-						Test your setup before the call.
-					</h2>
-					<p className="mt-3 max-w-2xl text-sm text-stone-600 leading-6">
-						Choose the camera, microphone, and speaker you want to use, then run
-						a quick local check.
-					</p>
-				</div>
+				<SectionHeader
+					description={
+						<>
+							Choisissez la caméra, le microphone et le haut-parleur à utiliser,
+							puis lancez une vérification locale rapide.
+						</>
+					}
+					eyebrow="Vérification des périphériques"
+					title="Tester votre configuration avant l'appel."
+				/>
 				<div className="flex flex-wrap gap-3">
-					<button
-						className="rounded-full bg-stone-950 px-5 py-3 font-semibold text-sm text-stone-50 transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:bg-stone-400"
+					<Button
 						disabled={props.previewStatus === "requesting"}
 						onClick={props.onStartPreview}
 						type="button"
 					>
 						{previewButtonLabel}
-					</button>
-					<button
-						className="rounded-full border border-stone-300 px-5 py-3 font-semibold text-sm text-stone-900 transition hover:border-stone-500 disabled:cursor-not-allowed disabled:opacity-60"
-						disabled={props.previewStatus === "requesting" || !props.hasLocalMedia}
+					</Button>
+					<Button
+						disabled={
+							props.previewStatus === "requesting" || !props.hasLocalMedia
+						}
 						onClick={props.onStopPreview}
 						type="button"
+						variant="secondary"
 					>
-						Stop preview
-					</button>
-					<button
-						className="rounded-full border border-stone-300 px-5 py-3 font-semibold text-sm text-stone-900 transition hover:border-stone-500 disabled:cursor-not-allowed disabled:opacity-60"
+						Arrêter l'aperçu
+					</Button>
+					<Button
 						disabled={props.previewStatus === "requesting"}
 						onClick={props.onRefreshDevices}
 						type="button"
+						variant="secondary"
 					>
-						Refresh devices
-					</button>
+						Actualiser les périphériques
+					</Button>
 				</div>
 			</div>
 
 			<div className="mt-6 grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
-				<section className="overflow-hidden rounded-[1.5rem] border border-stone-900/10 bg-stone-950">
+				<section className="overflow-hidden rounded-xl border border-slate-800 bg-slate-900">
 					<div className="relative aspect-video">
 						<video
 							autoPlay
@@ -124,29 +133,37 @@ export function VisioDevicePanel(props: {
 							ref={props.previewVideoRef}
 						/>
 						{!props.hasLocalVideoTrack || !props.isCameraEnabled ? (
-							<div className="absolute inset-0 flex items-center justify-center bg-stone-950/70 px-6 text-center text-sm text-stone-200">
+							<div className="absolute inset-0 flex items-center justify-center bg-slate-950/70 px-6 text-center text-slate-200 text-sm">
 								{props.hasLocalMedia
-									? "Camera preview is off."
-									: "Preview will appear here when you start the local device check."}
+									? "L'aperçu caméra est désactivé."
+									: "L'aperçu apparaîtra ici au démarrage de la vérification locale."}
 							</div>
 						) : null}
 					</div>
 					<div className="space-y-3 p-5">
-						<p className="font-semibold text-emerald-300 text-sm uppercase tracking-[0.3em]">
-							Local preview
+						<p className="font-semibold text-slate-300 text-sm">Aperçu local</p>
+						<p className="text-slate-200 text-sm leading-6">
+							{previewStatusText}
 						</p>
-						<p className="text-sm text-stone-200 leading-6">{previewStatusText}</p>
 					</div>
 				</section>
 
 				<section className="space-y-5">
-					<label className="block">
-						<span className="mb-2 block font-medium text-sm text-stone-700">
-							Camera
-						</span>
-						<select
-							className="block w-full rounded-2xl border border-stone-300 bg-stone-50 px-4 py-3 text-sm text-stone-900 disabled:cursor-not-allowed disabled:opacity-60"
-							disabled={!props.videoInputOptions.length || props.previewStatus === "requesting"}
+					<Field
+						help={
+							!props.videoInputOptions.length
+								? getMissingDeviceMessage("camera")
+								: null
+						}
+						htmlFor="visio-video-input"
+						label="Caméra"
+					>
+						<Select
+							disabled={
+								!props.videoInputOptions.length ||
+								props.previewStatus === "requesting"
+							}
+							id="visio-video-input"
 							onChange={(event) => {
 								props.onSelectVideoInput(event.target.value);
 							}}
@@ -155,8 +172,8 @@ export function VisioDevicePanel(props: {
 							{props.videoInputOptions.length ? null : (
 								<option value="">
 									{props.videoInputExposure === "unavailable"
-										? "No camera available"
-										: "Camera list will appear after access"}
+										? "Aucune caméra disponible"
+										: "La liste des caméras apparaîtra après l'accès"}
 								</option>
 							)}
 							{props.videoInputOptions.map((device) => (
@@ -164,21 +181,24 @@ export function VisioDevicePanel(props: {
 									{device.label}
 								</option>
 							))}
-						</select>
-						{!props.videoInputOptions.length ? (
-							<p className="mt-2 text-sm text-stone-500 leading-6">
-								{getMissingDeviceMessage("camera")}
-							</p>
-						) : null}
-					</label>
+						</Select>
+					</Field>
 
-					<label className="block">
-						<span className="mb-2 block font-medium text-sm text-stone-700">
-							Microphone
-						</span>
-						<select
-							className="block w-full rounded-2xl border border-stone-300 bg-stone-50 px-4 py-3 text-sm text-stone-900 disabled:cursor-not-allowed disabled:opacity-60"
-							disabled={!props.audioInputOptions.length || props.previewStatus === "requesting"}
+					<Field
+						help={
+							!props.audioInputOptions.length
+								? getMissingDeviceMessage("microphone")
+								: null
+						}
+						htmlFor="visio-audio-input"
+						label="Microphone"
+					>
+						<Select
+							disabled={
+								!props.audioInputOptions.length ||
+								props.previewStatus === "requesting"
+							}
+							id="visio-audio-input"
 							onChange={(event) => {
 								props.onSelectAudioInput(event.target.value);
 							}}
@@ -187,8 +207,8 @@ export function VisioDevicePanel(props: {
 							{props.audioInputOptions.length ? null : (
 								<option value="">
 									{props.audioInputExposure === "unavailable"
-										? "No microphone available"
-										: "Microphone list will appear after access"}
+										? "Aucun microphone disponible"
+										: "La liste des microphones apparaîtra après l'accès"}
 								</option>
 							)}
 							{props.audioInputOptions.map((device) => (
@@ -196,53 +216,59 @@ export function VisioDevicePanel(props: {
 									{device.label}
 								</option>
 							))}
-						</select>
-						{!props.audioInputOptions.length ? (
-							<p className="mt-2 text-sm text-stone-500 leading-6">
-								{getMissingDeviceMessage("microphone")}
-							</p>
-						) : null}
-					</label>
+						</Select>
+					</Field>
 
-					<div className="rounded-[1.25rem] border border-stone-200 bg-stone-50 p-4">
+					<div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
 						<div className="flex flex-wrap items-center justify-between gap-3">
 							<div>
-								<p className="font-semibold text-sm text-stone-950">
-									Microphone activity
+								<p className="font-semibold text-slate-950 text-sm">
+									Activité du microphone
 								</p>
-								<p className="mt-1 text-sm text-stone-600">
+								<p className="mt-1 text-slate-600 text-sm">
 									{props.hasLocalMedia && props.isMicEnabled
-										? "Speak to confirm that your mic reacts."
-										: "Start preview and unmute your microphone to test it."}
+										? "Parlez pour confirmer que votre micro réagit."
+										: "Démarrez l'aperçu et activez votre microphone pour le tester."}
 								</p>
 							</div>
-							<span className="font-semibold text-emerald-700 text-sm">
+							<span className="font-semibold text-sky-700 text-sm">
 								{formatMicLevel(props.micLevel)}
 							</span>
 						</div>
+						<meter
+							aria-label="Activité du microphone"
+							className="sr-only"
+							max={1}
+							min={0}
+							value={props.micLevel}
+						/>
 						<div
-							aria-label="Microphone activity"
-							className="mt-4 h-3 overflow-hidden rounded-full bg-stone-200"
-							role="meter"
+							aria-hidden="true"
+							className="mt-4 h-3 overflow-hidden rounded-full bg-slate-200"
 						>
 							<div
-								className="h-full rounded-full bg-emerald-500 transition-[width]"
+								className="h-full rounded-full bg-sky-500 transition-[width]"
 								style={{ width: formatMicLevel(props.micLevel) }}
 							/>
 						</div>
 					</div>
 
-					<label className="block">
-						<span className="mb-2 block font-medium text-sm text-stone-700">
-							Speaker
-						</span>
-						<select
-							className="block w-full rounded-2xl border border-stone-300 bg-stone-50 px-4 py-3 text-sm text-stone-900 disabled:cursor-not-allowed disabled:opacity-60"
+					<Field
+						help={
+							!props.audioOutputOptions.length
+								? getMissingDeviceMessage("speaker")
+								: null
+						}
+						htmlFor="visio-audio-output"
+						label="Haut-parleur"
+					>
+						<Select
 							disabled={
 								!props.audioOutputOptions.length ||
 								!props.isSpeakerSelectionSupported ||
 								props.previewStatus === "requesting"
 							}
+							id="visio-audio-output"
 							onChange={(event) => {
 								props.onSelectAudioOutput(event.target.value);
 							}}
@@ -251,8 +277,8 @@ export function VisioDevicePanel(props: {
 							{props.audioOutputOptions.length ? null : (
 								<option value="">
 									{props.audioOutputExposure === "unavailable"
-										? "No speaker output available"
-										: "Speaker list is browser-dependent"}
+										? "Aucune sortie haut-parleur disponible"
+										: "La liste des haut-parleurs dépend du navigateur"}
 								</option>
 							)}
 							{props.audioOutputOptions.map((device) => (
@@ -260,33 +286,33 @@ export function VisioDevicePanel(props: {
 									{device.label}
 								</option>
 							))}
-						</select>
-						{!props.audioOutputOptions.length ? (
-							<p className="mt-2 text-sm text-stone-500 leading-6">
-								{getMissingDeviceMessage("speaker")}
-							</p>
-						) : null}
-					</label>
+						</Select>
+					</Field>
 
 					<div className="flex flex-wrap items-center gap-3">
-						<button
-							className="rounded-full border border-stone-300 px-5 py-3 font-semibold text-sm text-stone-900 transition hover:border-stone-500 disabled:cursor-not-allowed disabled:opacity-60"
+						<Button
 							disabled={!props.isSpeakerTestSupported || props.isTestingSpeaker}
 							onClick={props.onTestSpeaker}
 							type="button"
+							variant="secondary"
 						>
-							{props.isTestingSpeaker ? "Playing test..." : "Test speaker"}
-						</button>
+							{props.isTestingSpeaker
+								? "Test en cours..."
+								: "Tester le haut-parleur"}
+						</Button>
 						{!props.isSpeakerSelectionSupported ? (
-							<p className="text-sm text-amber-700 leading-6">
-								Speaker output selection is not supported in this browser.
+							<p className="text-amber-700 text-sm leading-6">
+								La sélection de sortie audio n'est pas prise en charge dans ce
+								navigateur.
 							</p>
 						) : null}
 					</div>
 				</section>
 			</div>
 
-			<audio hidden ref={props.speakerTestAudioRef} />
-		</section>
+			<audio hidden ref={props.speakerTestAudioRef}>
+				<track kind="captions" />
+			</audio>
+		</Panel>
 	);
 }

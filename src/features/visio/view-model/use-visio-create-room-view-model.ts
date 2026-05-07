@@ -41,15 +41,17 @@ export const useVisioCreateRoomViewModel = () => {
 			setResult(null);
 			setError(
 				responsePayload && "error" in responsePayload
-					? (responsePayload.error ?? "Room creation failed.")
-					: "Room creation failed.",
+					? (responsePayload.error ?? "La création du salon a échoué.")
+					: "La création du salon a échoué.",
 			);
 			return;
 		}
 
 		if (!responsePayload || !("sharePath" in responsePayload)) {
 			setResult(null);
-			setError("Room creation succeeded, but the room link was missing.");
+			setError(
+				"La création du salon a réussi, mais le lien du salon est manquant.",
+			);
 			return;
 		}
 
@@ -80,7 +82,9 @@ export const useVisioCreateRoomViewModel = () => {
 			await navigator.clipboard.writeText(result.shareUrl);
 			setIsCopied(true);
 		} catch {
-			setError("Copy failed. You can still copy the room link manually.");
+			setError(
+				"La copie a échoué. Vous pouvez toujours copier le lien du salon manuellement.",
+			);
 		}
 	};
 

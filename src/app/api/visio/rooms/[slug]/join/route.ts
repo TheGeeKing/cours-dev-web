@@ -44,7 +44,7 @@ export async function POST(
 	} catch (error) {
 		return createVisioErrorResponse(
 			error,
-			"Joining the room failed due to a server error.",
+			"L'entrée dans le salon a échoué à cause d'une erreur serveur.",
 			"visio room join failed",
 		);
 	}

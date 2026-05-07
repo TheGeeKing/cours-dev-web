@@ -147,10 +147,7 @@ export const visioRoom = sqliteTable(
 			.references(() => user.id),
 		hostDisplayName: d.text({ length: 255 }).notNull(),
 		requireJoinAuth: d.integer({ mode: "boolean" }).default(false).notNull(),
-		requireWaitingRoom: d
-			.integer({ mode: "boolean" })
-			.default(false)
-			.notNull(),
+		requireWaitingRoom: d.integer({ mode: "boolean" }).default(false).notNull(),
 		createdAt: d
 			.integer({ mode: "timestamp" })
 			.default(sql`(unixepoch())`)
@@ -218,7 +215,9 @@ export const visioEvent = sqliteTable(
 	}),
 	(t) => [
 		index("visio_event_room_id_idx").on(t.roomId),
-		index("visio_event_recipient_participant_id_idx").on(t.recipientParticipantId),
+		index("visio_event_recipient_participant_id_idx").on(
+			t.recipientParticipantId,
+		),
 	],
 );
 

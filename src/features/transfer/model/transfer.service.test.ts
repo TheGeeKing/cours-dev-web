@@ -61,9 +61,7 @@ describe("transfer.service", () => {
 			},
 		]);
 
-		const { saveUploadedTransferFile } = await import(
-			"./transfer.service"
-		);
+		const { saveUploadedTransferFile } = await import("./transfer.service");
 
 		const result = await saveUploadedTransferFile({
 			file: new File(["abc"], "report.pdf", { type: "application/pdf" }),
@@ -92,10 +90,15 @@ describe("transfer.service", () => {
 				expiresAt: new Date("2026-04-10T08:00:00.000Z"),
 			},
 		]);
-		accessMock.mockRejectedValue(Object.assign(new Error("missing"), { code: "ENOENT" }));
+		accessMock.mockRejectedValue(
+			Object.assign(new Error("missing"), { code: "ENOENT" }),
+		);
 
 		const { getTransferShareState } = await import("./transfer.service");
-		const state = await getTransferShareState("secret-slug");
+		const state = await getTransferShareState(
+			"secret-slug",
+			new Date("2026-04-03T08:00:00.000Z"),
+		);
 
 		expect(state).toEqual({ status: "missing" });
 	});
@@ -115,7 +118,9 @@ describe("transfer.service", () => {
 				expiresAt: new Date("2026-03-27T08:00:00.000Z"),
 			},
 		] as never);
-		unlinkMock.mockRejectedValue(Object.assign(new Error("missing"), { code: "ENOENT" }));
+		unlinkMock.mockRejectedValue(
+			Object.assign(new Error("missing"), { code: "ENOENT" }),
+		);
 
 		const { deleteExpiredTransferFiles } = await import("./transfer.service");
 		const result = await deleteExpiredTransferFiles(

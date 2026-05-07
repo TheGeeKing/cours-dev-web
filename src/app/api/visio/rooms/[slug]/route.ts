@@ -17,7 +17,7 @@ export async function PATCH(
 
 	if (!session?.user) {
 		return Response.json(
-			{ error: "Sign in before updating room settings." },
+			{ error: "Connectez-vous avant de modifier les réglages du salon." },
 			{ status: 401 },
 		);
 	}
@@ -38,7 +38,7 @@ export async function PATCH(
 	} catch (error) {
 		return createVisioErrorResponse(
 			error,
-			"Room settings could not be updated.",
+			"Les réglages du salon n'ont pas pu être mis à jour.",
 			"visio room settings update failed",
 		);
 	}

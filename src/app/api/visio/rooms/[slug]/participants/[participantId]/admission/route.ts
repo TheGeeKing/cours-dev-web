@@ -18,7 +18,7 @@ export async function POST(
 
 	if (!session?.user) {
 		return Response.json(
-			{ error: "Sign in before reviewing guest access." },
+			{ error: "Connectez-vous avant d'examiner l'accès invité." },
 			{ status: 401 },
 		);
 	}
@@ -40,7 +40,7 @@ export async function POST(
 	} catch (error) {
 		return createVisioErrorResponse(
 			error,
-			"Guest review failed due to a server error.",
+			"L'examen de l'invité a échoué à cause d'une erreur serveur.",
 			"visio guest admission failed",
 		);
 	}

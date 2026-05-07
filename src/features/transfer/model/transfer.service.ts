@@ -1,9 +1,9 @@
 import "server-only";
 
+import { randomBytes } from "node:crypto";
 import { createReadStream } from "node:fs";
 import { access, mkdir, unlink, writeFile } from "node:fs/promises";
 import path from "node:path";
-import { randomBytes } from "node:crypto";
 import { Readable } from "node:stream";
 
 import { and, eq, inArray, lte } from "drizzle-orm";
@@ -107,7 +107,7 @@ export const saveUploadedTransferFile = async (input: {
 
 		if (!record) {
 			throw new TransferError(
-				"Transfer metadata could not be saved.",
+				"Les métadonnées du transfert n'ont pas pu être enregistrées.",
 				500,
 				"INTERNAL_ERROR",
 			);
@@ -158,20 +158,27 @@ export const getTransferShareState = async (
 	};
 };
 
-export const streamTransferFileBySlug = async (slug: string, now = new Date()) => {
+export const streamTransferFileBySlug = async (
+	slug: string,
+	now = new Date(),
+) => {
 	const record = await getTransferFileBySlug(slug);
 
 	if (!record) {
-		throw new TransferError("Transfer link not found.", 404, "NOT_FOUND");
+		throw new TransferError("Lien de transfert introuvable.", 404, "NOT_FOUND");
 	}
 
 	if (isExpired(record, now)) {
-		throw new TransferError("Transfer link expired.", 410, "EXPIRED");
+		throw new TransferError("Lien de transfert expiré.", 410, "EXPIRED");
 	}
 
 	const absolutePath = resolveTransferStoragePath(record.storagePath);
 	if (!(await ensureTransferFileExists(record.storagePath))) {
-		throw new TransferError("Transfer file not found.", 404, "NOT_FOUND");
+		throw new TransferError(
+			"Fichier de transfert introuvable.",
+			404,
+			"NOT_FOUND",
+		);
 	}
 
 	const stream = Readable.toWeb(createReadStream(absolutePath));
@@ -202,17 +209,15 @@ export const deleteExpiredTransferFiles = async (now = new Date()) => {
 		return { deletedCount: 0 };
 	}
 
-	await db
-		.delete(transferFile)
-		.where(
-			and(
-				lte(transferFile.expiresAt, now),
-				inArray(
-					transferFile.id,
-					expiredTransfers.map((record) => record.id),
-				),
+	await db.delete(transferFile).where(
+		and(
+			lte(transferFile.expiresAt, now),
+			inArray(
+				transferFile.id,
+				expiredTransfers.map((record) => record.id),
 			),
-		);
+		),
+	);
 
 	return { deletedCount: expiredTransfers.length };
 };

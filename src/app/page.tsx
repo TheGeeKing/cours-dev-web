@@ -4,26 +4,25 @@ import { redirect } from "next/navigation";
 import { HomeShell } from "@/app/_components/home-shell";
 import { auth } from "@/server/better-auth";
 import { getSession } from "@/server/better-auth/server";
+import { Button } from "@/shared/ui";
 
 export default async function Home() {
 	const session = await getSession();
 	const displayName =
-		session?.user.name ?? session?.user.email ?? "GitHub user";
+		session?.user.name ?? session?.user.email ?? "Utilisateur GitHub";
 
-	const sessionLabel = session
-		? "Ready for authenticated flows"
-		: "Sign in to start";
+	const sessionLabel = session ? "Connecté" : "Connectez-vous pour commencer";
 	const sessionDescription = session
-		? `Connected as ${displayName}. Upcoming commits will attach account, cart, checkout, and order history to this GitHub identity.`
-		: "The next feature commits will assume a GitHub-authenticated user. Sign in now if you want the baseline ready for protected account and cart flows.";
+		? `Connecté en tant que ${displayName}.`
+		: "Connectez-vous pour utiliser toutes les fonctionnalités de l'application";
 
 	return (
 		<HomeShell
 			authAction={
 				session ? (
 					<form>
-						<button
-							className="w-full rounded-full bg-stone-50 px-5 py-3 font-semibold text-stone-950 transition hover:bg-emerald-100"
+						<Button
+							className="w-full bg-white text-slate-900 hover:bg-slate-100"
 							formAction={async () => {
 								"use server";
 								await auth.api.signOut({
@@ -33,13 +32,13 @@ export default async function Home() {
 							}}
 							type="submit"
 						>
-							Sign out
-						</button>
+							Se déconnecter
+						</Button>
 					</form>
 				) : (
 					<form>
-						<button
-							className="w-full rounded-full bg-emerald-400 px-5 py-3 font-semibold text-stone-950 transition hover:bg-emerald-300"
+						<Button
+							className="w-full bg-white text-slate-900 hover:bg-slate-100"
 							formAction={async () => {
 								"use server";
 								const res = await auth.api.signInSocial({
@@ -49,14 +48,14 @@ export default async function Home() {
 									},
 								});
 								if (!res.url) {
-									throw new Error("No URL returned from signInSocial");
+									throw new Error("Aucune URL renvoyée par signInSocial");
 								}
 								redirect(res.url);
 							}}
 							type="submit"
 						>
-							Sign in with GitHub
-						</button>
+							Se connecter avec GitHub
+						</Button>
 					</form>
 				)
 			}

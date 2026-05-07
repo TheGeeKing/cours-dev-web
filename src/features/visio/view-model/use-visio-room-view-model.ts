@@ -1,7 +1,13 @@
 "use client";
 
-import { useEffect, useEffectEvent, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import {
+	useEffect,
+	useEffectEvent,
+	useRef,
+	useState,
+	useTransition,
+} from "react";
 
 import type {
 	VisioIceServer,
@@ -161,7 +167,9 @@ const updateRoomState = (
 				};
 			}
 
-			if (state.pendingGuest?.participantId === event.participant.participantId) {
+			if (
+				state.pendingGuest?.participantId === event.participant.participantId
+			) {
 				return {
 					...state,
 					pendingGuest: null,
@@ -173,19 +181,132 @@ const updateRoomState = (
 	return state;
 };
 
+const areRoomSettingsEqual = (
+	left: VisioRoomSettings | null,
+	right: VisioRoomSettings | null,
+) => {
+	if (left === right) {
+		return true;
+	}
+
+	if (!left || !right) {
+		return false;
+	}
+
+	return (
+		left.requireJoinAuth === right.requireJoinAuth &&
+		left.requireWaitingRoom === right.requireWaitingRoom
+	);
+};
+
+const areParticipantsEqual = (
+	left: VisioParticipantSummary | null,
+	right: VisioParticipantSummary | null,
+) => {
+	if (left === right) {
+		return true;
+	}
+
+	if (!left || !right) {
+		return false;
+	}
+
+	return (
+		left.participantId === right.participantId &&
+		left.displayName === right.displayName &&
+		left.role === right.role &&
+		left.status === right.status
+	);
+};
+
+const areRoomsEqual = (
+	left: VisioRoomPageState["room"],
+	right: VisioRoomPageState["room"],
+) => {
+	if (left === right) {
+		return true;
+	}
+
+	if (!left || !right) {
+		return false;
+	}
+
+	return (
+		left.slug === right.slug &&
+		left.sharePath === right.sharePath &&
+		left.hostDisplayName === right.hostDisplayName &&
+		left.settingsLocked === right.settingsLocked &&
+		left.expiresAt === right.expiresAt &&
+		areRoomSettingsEqual(left.settings, right.settings)
+	);
+};
+
+const areRoomPageStatesEqual = (
+	left: VisioRoomPageState,
+	right: VisioRoomPageState,
+) => {
+	if (left === right) {
+		return true;
+	}
+
+	if (left.status !== right.status || !areRoomsEqual(left.room, right.room)) {
+		return false;
+	}
+
+	switch (left.status) {
+		case "joinable":
+			return (
+				right.status === "joinable" &&
+				left.viewerSignedIn === right.viewerSignedIn &&
+				left.viewerCanJoin === right.viewerCanJoin
+			);
+		case "pending":
+			return (
+				right.status === "pending" &&
+				areParticipantsEqual(left.self, right.self)
+			);
+		case "in_call":
+			return (
+				right.status === "in_call" &&
+				areParticipantsEqual(left.self, right.self) &&
+				areParticipantsEqual(left.peer, right.peer) &&
+				areParticipantsEqual(left.pendingGuest, right.pendingGuest)
+			);
+		case "full":
+			return (
+				right.status === "full" &&
+				areParticipantsEqual(left.occupant, right.occupant)
+			);
+		case "rejected":
+			return (
+				right.status === "rejected" &&
+				areParticipantsEqual(left.self, right.self)
+			);
+		case "ended":
+		case "expired":
+			return true;
+	}
+};
+
+const getInitialSettingsDraft = (state: VisioRoomPageState) =>
+	state.status === "ended" ? null : state.room.settings;
+
 const getFallbackDeviceLabel = (kind: DeviceKind, index: number) => {
 	if (kind === "videoinput") {
-		return `Camera ${index + 1}`;
+		return `Caméra ${index + 1}`;
 	}
 
 	if (kind === "audioinput") {
 		return `Microphone ${index + 1}`;
 	}
 
-	return `Speaker ${index + 1}`;
+	return `Haut-parleur ${index + 1}`;
 };
 
-const toDeviceOptions = (devices: MediaDeviceInfo[], kind: DeviceKind): DeviceOption[] => {
+const toDeviceOptions = (
+	devices: MediaDeviceInfo[],
+	kind: DeviceKind,
+): DeviceOption[] => {
 	let index = 0;
 
 	return devices
@@ -206,7 +327,10 @@ const getPreferredDeviceId = (
 	currentDeviceId: string | null,
 	options: DeviceOption[],
 ) => {
-	if (currentDeviceId && options.some((option) => option.deviceId === currentDeviceId)) {
+	if (
+		currentDeviceId &&
+		options.some((option) => option.deviceId === currentDeviceId)
+	) {
 		return currentDeviceId;
 	}
 
@@ -251,7 +375,10 @@ const supportsSinkId = () => {
 		return false;
 	}
 
-	return typeof (HTMLMediaElement.prototype as SinkIdMediaElement).setSinkId === "function";
+	return (
+		typeof (HTMLMediaElement.prototype as SinkIdMediaElement).setSinkId ===
+		"function"
+	);
 };
 
 export const useVisioRoomViewModel = (input: {
@@ -271,26 +398,41 @@ export const useVisioRoomViewModel = (input: {
 	const [isCameraEnabled, setIsCameraEnabled] = useState(true);
 	const [connectionState, setConnectionState] = useState("waiting");
 	const [settingsDraft, setSettingsDraft] = useState<VisioRoomSettings | null>(
-		input.initialState.status === "ended" ? null : input.initialState.room.settings,
+		input.initialState.status === "ended"
+			? null
+			: input.initialState.room.settings,
 	);
 	const [localStream, setLocalStream] = useState<MediaStream | null>(null);
 	const [remoteStream, setRemoteStream] = useState<MediaStream | null>(null);
-	const [devicesLoaded, setDevicesLoaded] = useState(false);
-	const [audioInputOptions, setAudioInputOptions] = useState<DeviceOption[]>([]);
-	const [videoInputOptions, setVideoInputOptions] = useState<DeviceOption[]>([]);
-	const [audioOutputOptions, setAudioOutputOptions] = useState<DeviceOption[]>([]);
+	const [, setDevicesLoaded] = useState(false);
+	const [audioInputOptions, setAudioInputOptions] = useState<DeviceOption[]>(
+		[],
+	);
+	const [videoInputOptions, setVideoInputOptions] = useState<DeviceOption[]>(
+		[],
+	);
+	const [audioOutputOptions, setAudioOutputOptions] = useState<DeviceOption[]>(
+		[],
+	);
 	const [audioInputExposure, setAudioInputExposure] =
 		useState<DeviceExposureState>("unknown");
 	const [videoInputExposure, setVideoInputExposure] =
 		useState<DeviceExposureState>("unknown");
 	const [audioOutputExposure, setAudioOutputExposure] =
 		useState<DeviceExposureState>("unknown");
-	const [selectedAudioInputId, setSelectedAudioInputId] = useState<string | null>(null);
-	const [selectedVideoInputId, setSelectedVideoInputId] = useState<string | null>(null);
-	const [selectedAudioOutputId, setSelectedAudioOutputId] = useState<string | null>(null);
+	const [selectedAudioInputId, setSelectedAudioInputId] = useState<
+		string | null
+	>(null);
+	const [selectedVideoInputId, setSelectedVideoInputId] = useState<
+		string | null
+	>(null);
+	const [selectedAudioOutputId, setSelectedAudioOutputId] = useState<
+		string | null
+	>(null);
 	const [micLevel, setMicLevel] = useState(0);
 	const [isTestingSpeaker, setIsTestingSpeaker] = useState(false);
-	const [hasRequestedDeviceAccess, setHasRequestedDeviceAccess] = useState(false);
+	const [hasRequestedDeviceAccess, setHasRequestedDeviceAccess] =
+		useState(false);
 
 	const stateRef = useRef(state);
 	const eventSourceRef = useRef<EventSource | null>(null);
@@ -309,23 +451,28 @@ export const useVisioRoomViewModel = (input: {
 	const localVideoRef = useRef<HTMLVideoElement | null>(null);
 	const remoteVideoRef = useRef<HTMLVideoElement | null>(null);
 	const speakerTestAudioRef = useRef<HTMLAudioElement | null>(null);
+	const lastInitialStateRef = useRef(input.initialState);
 
 	const isSpeakerSelectionSupported = supportsSinkId();
 	const isSpeakerTestSupported =
 		isSpeakerSelectionSupported && getAudioContextConstructor() !== null;
-	const peerId = state.status === "in_call" ? state.peer?.participantId ?? null : null;
+	const peerId =
+		state.status === "in_call" ? (state.peer?.participantId ?? null) : null;
 
 	useEffect(() => {
 		stateRef.current = state;
 	}, [state]);
 
 	useEffect(() => {
+		if (
+			areRoomPageStatesEqual(lastInitialStateRef.current, input.initialState)
+		) {
+			return;
+		}
+
+		lastInitialStateRef.current = input.initialState;
 		setState(input.initialState);
-		setSettingsDraft(
-			input.initialState.status === "ended"
-				? null
-				: input.initialState.room.settings,
-		);
+		setSettingsDraft(getInitialSettingsDraft(input.initialState));
 		setError(null);
 		setNotice(null);
 	}, [input.initialState]);
@@ -356,10 +503,10 @@ export const useVisioRoomViewModel = (input: {
 		});
 
 		if (!response.ok) {
-			const responsePayload = (await response.json().catch(() => null)) as
-				| { error?: string }
-				| null;
-			throw new Error(responsePayload?.error ?? "Signal delivery failed.");
+			const responsePayload = (await response.json().catch(() => null)) as {
+				error?: string;
+			} | null;
+			throw new Error(responsePayload?.error ?? "L'envoi du signal a échoué.");
 		}
 	});
 
@@ -439,7 +586,7 @@ export const useVisioRoomViewModel = (input: {
 				setError(
 					signalError instanceof Error
 						? signalError.message
-						: "An ICE candidate could not be sent.",
+						: "Un candidat ICE n'a pas pu être envoyé.",
 				);
 			});
 		};
@@ -447,10 +594,9 @@ export const useVisioRoomViewModel = (input: {
 		peerConnection.ontrack = (event) => {
 			const nextRemoteStream =
 				remoteMediaStreamRef.current ?? new MediaStream();
-			const inboundTracks =
-				event.streams[0]?.getTracks().length
-					? event.streams[0].getTracks()
-					: [event.track];
+			const inboundTracks = event.streams[0]?.getTracks().length
+				? event.streams[0].getTracks()
+				: [event.track];
 
 			for (const track of inboundTracks) {
 				if (
@@ -471,14 +617,16 @@ export const useVisioRoomViewModel = (input: {
 			setConnectionState(peerConnection.connectionState);
 			if (peerConnection.connectionState === "failed") {
 				setNotice(
-					"Peer connection failed. If the devices are on different networks, configure TURN in VISIO_ICE_SERVERS_JSON.",
+					"La connexion pair à pair a échoué. Si les appareils sont sur des réseaux différents, configurez TURN dans VISIO_ICE_SERVERS_JSON.",
 				);
 			}
 		};
 
 		if (localStream) {
 			for (const track of localStream.getTracks()) {
-				if (peerConnection.getSenders().some((sender) => sender.track === track)) {
+				if (
+					peerConnection.getSenders().some((sender) => sender.track === track)
+				) {
 					continue;
 				}
 				peerConnection.addTrack(track, localStream);
@@ -563,25 +711,27 @@ export const useVisioRoomViewModel = (input: {
 		pendingIceCandidatesRef.current = [];
 	});
 
-	const buildMediaConstraints = useEffectEvent((selection?: {
-		audioInputId?: string | null;
-		videoInputId?: string | null;
-	}) => {
-		const nextAudioInputId = selection?.audioInputId ?? selectedAudioInputId;
-		const nextVideoInputId = selection?.videoInputId ?? selectedVideoInputId;
+	const buildMediaConstraints = useEffectEvent(
+		(selection?: {
+			audioInputId?: string | null;
+			videoInputId?: string | null;
+		}) => {
+			const nextAudioInputId = selection?.audioInputId ?? selectedAudioInputId;
+			const nextVideoInputId = selection?.videoInputId ?? selectedVideoInputId;
 
-		const audioConstraint = nextAudioInputId
-			? { deviceId: { exact: nextAudioInputId } }
-			: true;
-		const videoConstraint = nextVideoInputId
-			? { deviceId: { exact: nextVideoInputId } }
-			: true;
+			const audioConstraint = nextAudioInputId
+				? { deviceId: { exact: nextAudioInputId } }
+				: true;
+			const videoConstraint = nextVideoInputId
+				? { deviceId: { exact: nextVideoInputId } }
+				: true;
 
-		return {
-			audio: audioConstraint,
-			video: videoConstraint,
-		};
-	});
+			return {
+				audio: audioConstraint,
+				video: videoConstraint,
+			};
+		},
+	);
 
 	const refreshDevices = useEffectEvent(async () => {
 		if (!navigator.mediaDevices?.enumerateDevices) {
@@ -648,34 +798,36 @@ export const useVisioRoomViewModel = (input: {
 		}
 	});
 
-	const syncPeerConnectionTracks = useEffectEvent(async (stream: MediaStream) => {
-		const currentState = stateRef.current;
-		if (currentState.status !== "in_call" || !currentState.peer) {
-			return;
-		}
-
-		const peerConnection = ensurePeerConnection();
-		const tracksByKind = {
-			audio: getTrackForKind(stream, "audio"),
-			video: getTrackForKind(stream, "video"),
-		};
-
-		for (const kind of ["audio", "video"] as const) {
-			const track = tracksByKind[kind];
-			const sender = peerConnection
-				.getSenders()
-				.find((candidate) => candidate.track?.kind === kind);
-
-			if (sender) {
-				await sender.replaceTrack(track);
-				continue;
+	const syncPeerConnectionTracks = useEffectEvent(
+		async (stream: MediaStream) => {
+			const currentState = stateRef.current;
+			if (currentState.status !== "in_call" || !currentState.peer) {
+				return;
 			}
 
-			if (track) {
-				peerConnection.addTrack(track, stream);
+			const peerConnection = ensurePeerConnection();
+			const tracksByKind = {
+				audio: getTrackForKind(stream, "audio"),
+				video: getTrackForKind(stream, "video"),
+			};
+
+			for (const kind of ["audio", "video"] as const) {
+				const track = tracksByKind[kind];
+				const sender = peerConnection
+					.getSenders()
+					.find((candidate) => candidate.track?.kind === kind);
+
+				if (sender) {
+					await sender.replaceTrack(track);
+					continue;
+				}
+
+				if (track) {
+					peerConnection.addTrack(track, stream);
+				}
 			}
-		}
-	});
+		},
+	);
 
 	const applyLocalTrackPreferences = useEffectEvent((stream: MediaStream) => {
 		for (const track of stream.getAudioTracks()) {
@@ -716,7 +868,10 @@ export const useVisioRoomViewModel = (input: {
 
 				const volume = Math.sqrt(total / data.length);
 				setMicLevel(Math.min(1, volume * 4));
-				audioMonitorRef.current!.frameId = window.requestAnimationFrame(monitor);
+				if (audioMonitorRef.current) {
+					audioMonitorRef.current.frameId =
+						window.requestAnimationFrame(monitor);
+				}
 			};
 
 			audioMonitorRef.current = {
@@ -745,56 +900,62 @@ export const useVisioRoomViewModel = (input: {
 		},
 	);
 
-	const startPreview = useEffectEvent(async (selection?: {
-		audioInputId?: string | null;
-		videoInputId?: string | null;
-	}) => {
-		setError(null);
-		setNotice(null);
-		setHasRequestedDeviceAccess(true);
+	const startPreview = useEffectEvent(
+		async (selection?: {
+			audioInputId?: string | null;
+			videoInputId?: string | null;
+		}) => {
+			setError(null);
+			setNotice(null);
+			setHasRequestedDeviceAccess(true);
 
-		if (!navigator.mediaDevices?.getUserMedia) {
-			setPreviewStatus("unsupported");
-			setError("Camera and microphone access are not available here.");
-			return;
-		}
+			if (!navigator.mediaDevices?.getUserMedia) {
+				setPreviewStatus("unsupported");
+				setError(
+					"L'accès à la caméra et au microphone n'est pas disponible ici.",
+				);
+				return;
+			}
 
-		const constraints = buildMediaConstraints(selection);
-		if (!constraints.audio && !constraints.video) {
-			setPreviewStatus("unsupported");
-			setError("No camera or microphone is available on this device.");
-			return;
-		}
+			const constraints = buildMediaConstraints(selection);
+			if (!constraints.audio && !constraints.video) {
+				setPreviewStatus("unsupported");
+				setError(
+					"Aucune caméra ni aucun microphone n'est disponible sur cet appareil.",
+				);
+				return;
+			}
 
-		const previousStream = localStream;
+			const previousStream = localStream;
 
-		try {
-			setPreviewStatus("requesting");
-			const stream = await navigator.mediaDevices.getUserMedia(constraints);
-			applyLocalTrackPreferences(stream);
-			setLocalStream(stream);
-			setPreviewStatus("ready");
-			localReadyRef.current = true;
-			setAudioInputExposure(
-				stream.getAudioTracks().length > 0 ? "available" : "unavailable",
-			);
-			setVideoInputExposure(
-				stream.getVideoTracks().length > 0 ? "available" : "unavailable",
-			);
-			await refreshDevices();
-			await syncPeerConnectionTracks(stream);
-			stopStream(previousStream);
-			await maybeAnnounceLocalReady();
-		} catch (mediaError) {
-			setPreviewStatus("idle");
-			localReadyRef.current = false;
-			setError(
-				mediaError instanceof Error
-					? mediaError.message
-					: "Camera and microphone access was denied.",
-			);
-		}
-	});
+			try {
+				setPreviewStatus("requesting");
+				const stream = await navigator.mediaDevices.getUserMedia(constraints);
+				applyLocalTrackPreferences(stream);
+				setLocalStream(stream);
+				setPreviewStatus("ready");
+				localReadyRef.current = true;
+				setAudioInputExposure(
+					stream.getAudioTracks().length > 0 ? "available" : "unavailable",
+				);
+				setVideoInputExposure(
+					stream.getVideoTracks().length > 0 ? "available" : "unavailable",
+				);
+				await refreshDevices();
+				await syncPeerConnectionTracks(stream);
+				stopStream(previousStream);
+				await maybeAnnounceLocalReady();
+			} catch (mediaError) {
+				setPreviewStatus("idle");
+				localReadyRef.current = false;
+				setError(
+					mediaError instanceof Error
+						? mediaError.message
+						: "L'accès à la caméra et au microphone a été refusé.",
+				);
+			}
+		},
+	);
 
 	const handleSignalEvent = useEffectEvent(
 		async (event: Extract<VisioRoomEvent, { type: "signal" }>) => {
@@ -871,7 +1032,10 @@ export const useVisioRoomViewModel = (input: {
 			void refreshDevices();
 		};
 
-		navigator.mediaDevices.addEventListener?.("devicechange", handleDeviceChange);
+		navigator.mediaDevices.addEventListener?.(
+			"devicechange",
+			handleDeviceChange,
+		);
 
 		return () => {
 			navigator.mediaDevices.removeEventListener?.(
@@ -901,11 +1065,11 @@ export const useVisioRoomViewModel = (input: {
 				setError(
 					signalError instanceof Error
 						? signalError.message
-						: "Local media could not be announced.",
+						: "Le média local n'a pas pu être annoncé.",
 				);
 			});
 		}
-	}, [localStream, peerId, state.status]);
+	}, [peerId]);
 
 	useEffect(() => {
 		if (!selectedAudioOutputId || !isSpeakerSelectionSupported) {
@@ -914,16 +1078,21 @@ export const useVisioRoomViewModel = (input: {
 
 		void (async () => {
 			try {
-				await applySinkIdToElement(remoteVideoRef.current, selectedAudioOutputId);
+				await applySinkIdToElement(
+					remoteVideoRef.current,
+					selectedAudioOutputId,
+				);
 				await applySinkIdToElement(
 					speakerTestAudioRef.current,
 					selectedAudioOutputId,
 				);
 			} catch {
-				setNotice("Speaker output selection is not supported in this browser.");
+				setNotice(
+					"La sélection de sortie audio n'est pas prise en charge dans ce navigateur.",
+				);
 			}
 		})();
-	}, [isSpeakerSelectionSupported, remoteStream, selectedAudioOutputId, state.status]);
+	}, [isSpeakerSelectionSupported, selectedAudioOutputId]);
 
 	useEffect(() => {
 		if (!(state.status === "pending" || state.status === "in_call")) {
@@ -938,7 +1107,9 @@ export const useVisioRoomViewModel = (input: {
 		eventSourceRef.current = source;
 
 		source.addEventListener("visio", (message) => {
-			const event = JSON.parse((message as MessageEvent).data) as VisioRoomEvent;
+			const event = JSON.parse(
+				(message as MessageEvent).data,
+			) as VisioRoomEvent;
 			lastEventIdRef.current = event.id;
 
 			if (event.type === "room-ended") {
@@ -958,7 +1129,7 @@ export const useVisioRoomViewModel = (input: {
 					setError(
 						signalError instanceof Error
 							? signalError.message
-							: "The incoming signal could not be processed.",
+							: "Le signal entrant n'a pas pu être traité.",
 					);
 				});
 			}
@@ -970,11 +1141,14 @@ export const useVisioRoomViewModel = (input: {
 			const payload = JSON.parse((message as MessageEvent).data) as {
 				error?: string;
 			};
-			setError(payload.error ?? "The room event stream closed unexpectedly.");
+			setError(
+				payload.error ??
+					"Le flux d'événements du salon s'est fermé de façon inattendue.",
+			);
 		});
 
 		source.onerror = () => {
-			setNotice("The room is reconnecting to live events.");
+			setNotice("Le salon se reconnecte aux événements en direct.");
 		};
 
 		return () => {
@@ -1000,11 +1174,16 @@ export const useVisioRoomViewModel = (input: {
 		}
 
 		try {
-			const shareUrl = new URL(state.room.sharePath, window.location.origin).toString();
+			const shareUrl = new URL(
+				state.room.sharePath,
+				window.location.origin,
+			).toString();
 			await navigator.clipboard.writeText(shareUrl);
 			setIsCopied(true);
 		} catch {
-			setError("Copy failed. You can still copy the room link manually.");
+			setError(
+				"La copie a échoué. Vous pouvez toujours copier le lien du salon manuellement.",
+			);
 		}
 	};
 
@@ -1021,19 +1200,22 @@ export const useVisioRoomViewModel = (input: {
 		setError(null);
 		startTransition(() => {
 			void (async () => {
-				const response = await fetch(`/api/visio/rooms/${input.roomSlug}/join`, {
-					method: "POST",
-					headers: {
-						"Content-Type": "application/json",
+				const response = await fetch(
+					`/api/visio/rooms/${input.roomSlug}/join`,
+					{
+						method: "POST",
+						headers: {
+							"Content-Type": "application/json",
+						},
+						body: JSON.stringify({ displayName: joinName }),
 					},
-					body: JSON.stringify({ displayName: joinName }),
-				});
+				);
 
 				if (!response.ok) {
-					const payload = (await response.json().catch(() => null)) as
-						| { error?: string }
-						| null;
-					setError(payload?.error ?? "The room could not be joined.");
+					const payload = (await response.json().catch(() => null)) as {
+						error?: string;
+					} | null;
+					setError(payload?.error ?? "Le salon n'a pas pu être rejoint.");
 					return;
 				}
 
@@ -1082,14 +1264,18 @@ export const useVisioRoomViewModel = (input: {
 
 	const handleTestSpeaker = async () => {
 		if (!isSpeakerTestSupported) {
-			setNotice("Speaker output selection is not supported in this browser.");
+			setNotice(
+				"La sélection de sortie audio n'est pas prise en charge dans ce navigateur.",
+			);
 			return;
 		}
 
 		const speakerTestAudio = speakerTestAudioRef.current;
 		const AudioContextCtor = getAudioContextConstructor();
 		if (!speakerTestAudio || !AudioContextCtor) {
-			setNotice("Speaker output selection is not supported in this browser.");
+			setNotice(
+				"La sélection de sortie audio n'est pas prise en charge dans ce navigateur.",
+			);
 			return;
 		}
 
@@ -1130,7 +1316,7 @@ export const useVisioRoomViewModel = (input: {
 			setError(
 				speakerError instanceof Error
 					? speakerError.message
-					: "The speaker test could not be played.",
+					: "Le test du haut-parleur n'a pas pu être lu.",
 			);
 		}
 	};
@@ -1162,15 +1348,18 @@ export const useVisioRoomViewModel = (input: {
 		setError(null);
 		startTransition(() => {
 			void (async () => {
-				const response = await fetch(`/api/visio/rooms/${input.roomSlug}/leave`, {
-					method: "POST",
-				});
+				const response = await fetch(
+					`/api/visio/rooms/${input.roomSlug}/leave`,
+					{
+						method: "POST",
+					},
+				);
 
 				if (!response.ok) {
-					const payload = (await response.json().catch(() => null)) as
-						| { error?: string }
-						| null;
-					setError(payload?.error ?? "The room could not be left.");
+					const payload = (await response.json().catch(() => null)) as {
+						error?: string;
+					} | null;
+					setError(payload?.error ?? "Le salon n'a pas pu être quitté.");
 					return;
 				}
 
@@ -1200,16 +1389,18 @@ export const useVisioRoomViewModel = (input: {
 				);
 
 				if (!response.ok) {
-					const payload = (await response.json().catch(() => null)) as
-						| { error?: string }
-						| null;
-					setError(payload?.error ?? "The guest review could not be completed.");
+					const payload = (await response.json().catch(() => null)) as {
+						error?: string;
+					} | null;
+					setError(
+						payload?.error ?? "L'examen de l'invité n'a pas pu être terminé.",
+					);
 					return;
 				}
 
-				const payload = (await response.json().catch(() => null)) as
-					| { participant?: VisioParticipantSummary }
-					| null;
+				const payload = (await response.json().catch(() => null)) as {
+					participant?: VisioParticipantSummary;
+				} | null;
 
 				if (decision === "approve" && payload?.participant) {
 					const approvedParticipant = payload.participant;
@@ -1260,16 +1451,20 @@ export const useVisioRoomViewModel = (input: {
 				});
 
 				if (!response.ok) {
-					const payload = (await response.json().catch(() => null)) as
-						| { error?: string }
-						| null;
-					setError(payload?.error ?? "Room settings could not be saved.");
+					const payload = (await response.json().catch(() => null)) as {
+						error?: string;
+					} | null;
+					setError(
+						payload?.error ??
+							"Les réglages du salon n'ont pas pu être enregistrés.",
+					);
 					return;
 				}
 
-				const payload = (await response.json().catch(() => null)) as
-					| { settings?: VisioRoomSettings; settingsLocked?: boolean }
-					| null;
+				const payload = (await response.json().catch(() => null)) as {
+					settings?: VisioRoomSettings;
+					settingsLocked?: boolean;
+				} | null;
 
 				if (!payload?.settings) {
 					return;
@@ -1302,9 +1497,8 @@ export const useVisioRoomViewModel = (input: {
 	const effectiveVideoInputExposure = hasLocalVideoTrack
 		? "available"
 		: videoInputExposure;
-	const effectiveAudioOutputExposure = audioOutputOptions.length > 0
-		? "available"
-		: audioOutputExposure;
+	const effectiveAudioOutputExposure =
+		audioOutputOptions.length > 0 ? "available" : audioOutputExposure;
 
 	return {
 		state,

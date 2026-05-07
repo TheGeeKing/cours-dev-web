@@ -63,27 +63,33 @@ class MockPeerConnection {
 	createAnswer = vi.fn(async () => ({ type: "answer", sdp: "answer-sdp" }));
 	createOffer = vi.fn(async () => ({ type: "offer", sdp: "offer-sdp" }));
 	addIceCandidate = vi.fn(async () => undefined);
-	setLocalDescription = vi.fn(async (description: RTCSessionDescriptionInit) => {
-		this.localDescription = description;
-	});
-	setRemoteDescription = vi.fn(async (description: RTCSessionDescriptionInit) => {
-		this.remoteDescription = description;
-	});
+	setLocalDescription = vi.fn(
+		async (description: RTCSessionDescriptionInit) => {
+			this.localDescription = description;
+		},
+	);
+	setRemoteDescription = vi.fn(
+		async (description: RTCSessionDescriptionInit) => {
+			this.remoteDescription = description;
+		},
+	);
 
 	constructor(public readonly configuration: RTCConfiguration) {
 		MockPeerConnection.instances.push(this);
 	}
 
 	addTrack(track: MediaStreamTrack, _stream: MediaStream) {
-		const replaceTrackMock = vi.fn(async (nextTrack: MediaStreamTrack | null) => {
-			sender.track = nextTrack;
-		});
+		const replaceTrackMock = vi.fn(
+			async (nextTrack: MediaStreamTrack | null) => {
+				sender.track = nextTrack;
+			},
+		);
 		const sender = {
 			kind: track.kind as "audio" | "video",
 			track,
 			replaceTrack: replaceTrackMock,
 			replaceTrackMock,
-		} as MockSender;
+		} as unknown as MockSender;
 
 		this.senders.push(sender);
 		return sender;
@@ -111,8 +117,12 @@ const createStream = (input: {
 	audioDeviceId?: string | null;
 	videoDeviceId?: string | null;
 }): FakeStream => {
-	const audioTracks = input.audioDeviceId ? [createTrack("audio", input.audioDeviceId)] : [];
-	const videoTracks = input.videoDeviceId ? [createTrack("video", input.videoDeviceId)] : [];
+	const audioTracks = input.audioDeviceId
+		? [createTrack("audio", input.audioDeviceId)]
+		: [];
+	const videoTracks = input.videoDeviceId
+		? [createTrack("video", input.videoDeviceId)]
+		: [];
 
 	return {
 		audioTracks,
@@ -178,12 +188,14 @@ const createJoinableState = () =>
 		viewerCanJoin: true,
 	}) as const;
 
-const createInCallState = (peer: {
-	participantId: string;
-	displayName: string;
-	role: "host" | "guest";
-	status: "active";
-} | null) =>
+const createInCallState = (
+	peer: {
+		participantId: string;
+		displayName: string;
+		role: "host" | "guest";
+		status: "active";
+	} | null,
+) =>
 	({
 		status: "in_call",
 		room: {
@@ -260,10 +272,12 @@ describe("useVisioRoomViewModel", () => {
 
 	it("starts preview before join without sending any signal", async () => {
 		const getUserMediaMock = vi.mocked(navigator.mediaDevices.getUserMedia);
-		getUserMediaMock.mockResolvedValue(createStream({
-			audioDeviceId: "mic-1",
-			videoDeviceId: "cam-1",
-		}));
+		getUserMediaMock.mockResolvedValue(
+			createStream({
+				audioDeviceId: "mic-1",
+				videoDeviceId: "cam-1",
+			}),
+		);
 		const fetchMock = vi.mocked(fetch);
 
 		const { result } = renderHook(() =>
@@ -291,10 +305,12 @@ describe("useVisioRoomViewModel", () => {
 
 	it("waits for a peer before announcing local readiness", async () => {
 		const getUserMediaMock = vi.mocked(navigator.mediaDevices.getUserMedia);
-		getUserMediaMock.mockResolvedValue(createStream({
-			audioDeviceId: "mic-1",
-			videoDeviceId: "cam-1",
-		}));
+		getUserMediaMock.mockResolvedValue(
+			createStream({
+				audioDeviceId: "mic-1",
+				videoDeviceId: "cam-1",
+			}),
+		);
 		const fetchMock = vi.mocked(fetch);
 
 		const { result, rerender } = renderHook(
@@ -338,7 +354,9 @@ describe("useVisioRoomViewModel", () => {
 			expect(fetchMock).toHaveBeenCalledTimes(1);
 		});
 
-		expect(fetchMock.mock.calls[0]?.[0]).toBe("/api/visio/rooms/room-slug/signals");
+		expect(fetchMock.mock.calls[0]?.[0]).toBe(
+			"/api/visio/rooms/room-slug/signals",
+		);
 		expect(
 			JSON.parse(String(fetchMock.mock.calls[0]?.[1]?.body)).signalType,
 		).toBe("ready");
@@ -387,23 +405,27 @@ describe("useVisioRoomViewModel", () => {
 
 		const peerConnection = MockPeerConnection.instances[0];
 		expect(peerConnection).toBeDefined();
-		const audioSender = peerConnection!.senders.find(
+		if (!peerConnection) {
+			throw new Error("Expected peer connection to be created.");
+		}
+		const audioSender = peerConnection.senders.find(
 			(sender) => sender.kind === "audio",
 		);
-		const videoSender = peerConnection!.senders.find(
+		const videoSender = peerConnection.senders.find(
 			(sender) => sender.kind === "video",
 		);
 
 		expect(audioSender).toBeDefined();
 		expect(videoSender).toBeDefined();
+		if (!audioSender || !videoSender) {
+			throw new Error("Expected audio and video senders to be created.");
+		}
 
 		await act(async () => {
 			await result.current.handleSelectAudioInput("mic-2");
 		});
 
-		expect(
-			getUserMediaMock.mock.calls[1]?.[0],
-		).toMatchObject({
+		expect(getUserMediaMock.mock.calls[1]?.[0]).toMatchObject({
 			audio: {
 				deviceId: {
 					exact: "mic-2",
@@ -415,15 +437,13 @@ describe("useVisioRoomViewModel", () => {
 				},
 			},
 		});
-		expect(audioSender!.replaceTrackMock).toHaveBeenCalled();
+		expect(audioSender.replaceTrackMock).toHaveBeenCalled();
 
 		await act(async () => {
 			await result.current.handleSelectVideoInput("cam-2");
 		});
 
-		expect(
-			getUserMediaMock.mock.calls[2]?.[0],
-		).toMatchObject({
+		expect(getUserMediaMock.mock.calls[2]?.[0]).toMatchObject({
 			audio: {
 				deviceId: {
 					exact: "mic-2",
@@ -435,7 +455,7 @@ describe("useVisioRoomViewModel", () => {
 				},
 			},
 		});
-		expect(videoSender!.replaceTrackMock).toHaveBeenCalled();
+		expect(videoSender.replaceTrackMock).toHaveBeenCalled();
 		expect(result.current.hasLocalMedia).toBe(true);
 	});
 
@@ -457,7 +477,9 @@ describe("useVisioRoomViewModel", () => {
 	});
 
 	it("falls back to a valid device when the selected hardware disappears", async () => {
-		const enumerateDevicesMock = vi.mocked(navigator.mediaDevices.enumerateDevices);
+		const enumerateDevicesMock = vi.mocked(
+			navigator.mediaDevices.enumerateDevices,
+		);
 		enumerateDevicesMock
 			.mockResolvedValueOnce(createDevices())
 			.mockResolvedValueOnce(

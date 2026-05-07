@@ -40,7 +40,7 @@ describe("POST /api/transfer/upload", () => {
 
 		expect(response.status).toBe(401);
 		await expect(response.json()).resolves.toEqual({
-			error: "Sign in to upload files.",
+			error: "Connectez-vous pour envoyer des fichiers.",
 		});
 	});
 
@@ -61,7 +61,10 @@ describe("POST /api/transfer/upload", () => {
 
 		const { POST } = await import("./route");
 		const formData = new FormData();
-		formData.append("file", new File(["abc"], "report.pdf", { type: "application/pdf" }));
+		formData.append(
+			"file",
+			new File(["abc"], "report.pdf", { type: "application/pdf" }),
+		);
 		const request = new Request("http://localhost/api/transfer/upload", {
 			method: "POST",
 			body: formData,

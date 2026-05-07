@@ -43,7 +43,7 @@ describe("GET /api/transfer/[slug]/download", () => {
 
 	it("fails safely for expired or missing transfers", async () => {
 		streamTransferFileBySlugMock.mockRejectedValue(
-			new TransferError("Transfer link expired.", 410, "EXPIRED"),
+			new TransferError("Lien de transfert expiré.", 410, "EXPIRED"),
 		);
 
 		const { GET } = await import("./route");
@@ -53,7 +53,7 @@ describe("GET /api/transfer/[slug]/download", () => {
 
 		expect(response.status).toBe(410);
 		await expect(response.json()).resolves.toEqual({
-			error: "Transfer link expired.",
+			error: "Lien de transfert expiré.",
 		});
 	});
 });

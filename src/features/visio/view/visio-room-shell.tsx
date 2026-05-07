@@ -2,22 +2,34 @@
 
 import type { RefObject } from "react";
 
-import type { VisioIceServer, VisioRoomPageState } from "@/features/visio/model/visio.types";
+import type {
+	VisioIceServer,
+	VisioRoomPageState,
+} from "@/features/visio/model/visio.types";
 import { VisioDevicePanel } from "@/features/visio/view/visio-device-panel";
 import { useVisioRoomViewModel } from "@/features/visio/view-model/use-visio-room-view-model";
+import {
+	Alert,
+	Badge,
+	Button,
+	CheckboxRow,
+	Field,
+	FormPanel,
+	Input,
+	PageContainer,
+	PageShell,
+	Panel,
+	SectionHeader,
+} from "@/shared/ui";
 
 const formatDate = (value: string) =>
-	new Intl.DateTimeFormat("en", {
+	new Intl.DateTimeFormat("fr-FR", {
 		dateStyle: "medium",
 		timeStyle: "short",
 	}).format(new Date(value));
 
 function StatusPill(props: { label: string }) {
-	return (
-		<span className="rounded-full border border-stone-900/10 bg-stone-100 px-3 py-1 font-medium text-sm text-stone-700">
-			{props.label}
-		</span>
-	);
+	return <Badge>{props.label}</Badge>;
 }
 
 function VideoPanel(props: {
@@ -27,24 +39,22 @@ function VideoPanel(props: {
 	videoRef: RefObject<HTMLVideoElement | null>;
 }) {
 	return (
-		<section className="overflow-hidden rounded-[1.75rem] border border-stone-900/10 bg-white shadow-[0_18px_48px_rgba(41,37,36,0.08)]">
-			<div className="aspect-video bg-stone-950">
+		<Panel className="overflow-hidden p-0">
+			<div className="aspect-video bg-slate-950">
 				<video
 					autoPlay
 					className="size-full object-cover"
-					muted={props.label !== "Remote"}
+					muted={props.label !== "Distant"}
 					playsInline
 					ref={props.videoRef}
 				/>
 			</div>
 			<div className="space-y-2 p-5">
-				<p className="font-semibold text-emerald-700 text-sm uppercase tracking-[0.3em]">
-					{props.label}
-				</p>
-				<h3 className="font-semibold text-xl text-stone-950">{props.name}</h3>
-				<p className="text-sm text-stone-600 leading-6">{props.status}</p>
+				<p className="font-semibold text-slate-500 text-sm">{props.label}</p>
+				<h3 className="font-semibold text-slate-950 text-xl">{props.name}</h3>
+				<p className="text-slate-600 text-sm leading-6">{props.status}</p>
 			</div>
-		</section>
+		</Panel>
 	);
 }
 
@@ -57,20 +67,18 @@ export function VisioRoomShell(props: {
 
 	if (viewModel.state.status === "ended") {
 		return (
-			<main className="min-h-screen bg-[linear-gradient(180deg,#f7f3eb_0%,#dfe8dc_45%,#f2ede2_100%)] px-4 py-10 text-stone-900 sm:px-6 lg:px-8">
-				<div className="mx-auto max-w-3xl rounded-[2rem] border border-stone-900/10 bg-white/85 p-8 shadow-[0_24px_80px_rgba(41,37,36,0.12)] backdrop-blur">
-					<p className="font-semibold text-stone-600 text-sm uppercase tracking-[0.35em]">
-						Unavailable
-					</p>
-					<h1 className="mt-4 font-black text-4xl text-stone-950 tracking-tight">
-						This visio room is no longer available.
-					</h1>
-					<p className="mt-3 max-w-2xl text-sm text-stone-600 leading-6">
-						The room link may be invalid, or the host may already have ended the
-						call.
-					</p>
-				</div>
-			</main>
+			<PageShell>
+				<PageContainer size="narrow">
+					<Panel>
+						<SectionHeader
+							description="Le lien du salon est peut-être invalide, ou l'hôte a peut-être déjà terminé l'appel."
+							eyebrow="Indisponible"
+							title="Ce salon visio n'est plus disponible."
+							titleAs="h1"
+						/>
+					</Panel>
+				</PageContainer>
+			</PageShell>
 		);
 	}
 
@@ -86,13 +94,14 @@ export function VisioRoomShell(props: {
 		viewModel.state.status === "rejected" ? viewModel.state : null;
 	const expiredState =
 		viewModel.state.status === "expired" ? viewModel.state : null;
+	const settingsDraft = viewModel.settingsDraft;
 
 	const devicePanel = (
 		<VisioDevicePanel
-			audioInputOptions={viewModel.audioInputOptions}
 			audioInputExposure={viewModel.audioInputExposure}
-			audioOutputOptions={viewModel.audioOutputOptions}
+			audioInputOptions={viewModel.audioInputOptions}
 			audioOutputExposure={viewModel.audioOutputExposure}
+			audioOutputOptions={viewModel.audioOutputOptions}
 			hasLocalMedia={viewModel.hasLocalMedia}
 			hasLocalVideoTrack={viewModel.hasLocalVideoTrack}
 			hasRequestedDeviceAccess={viewModel.hasRequestedDeviceAccess}
@@ -129,85 +138,81 @@ export function VisioRoomShell(props: {
 			selectedAudioOutputId={viewModel.selectedAudioOutputId}
 			selectedVideoInputId={viewModel.selectedVideoInputId}
 			speakerTestAudioRef={viewModel.speakerTestAudioRef}
-			videoInputOptions={viewModel.videoInputOptions}
 			videoInputExposure={viewModel.videoInputExposure}
+			videoInputOptions={viewModel.videoInputOptions}
 		/>
 	);
 
 	return (
-		<main className="min-h-screen bg-[linear-gradient(180deg,#f7f3eb_0%,#dfe8dc_45%,#f2ede2_100%)] px-4 py-10 text-stone-900 sm:px-6 lg:px-8">
-			<div className="mx-auto flex w-full max-w-6xl flex-col gap-6">
-				<section className="rounded-[1.75rem] border border-stone-900/10 bg-white/75 px-6 py-5 shadow-[0_16px_48px_rgba(41,37,36,0.08)] backdrop-blur">
+		<PageShell>
+			<PageContainer>
+				<Panel className="py-4">
 					<div className="flex flex-wrap items-start justify-between gap-4">
-						<div className="space-y-3">
-							<p className="font-semibold text-emerald-700 text-sm uppercase tracking-[0.3em]">
-								Visio room
-							</p>
-							<div>
-								<h1 className="font-black text-3xl text-stone-950 tracking-tight">
-									Hosted by {room.hostDisplayName}
-								</h1>
-								<p className="mt-2 text-sm text-stone-600 leading-6">
-									Room expires on {formatDate(room.expiresAt)}.
-								</p>
-							</div>
-						</div>
+						<SectionHeader
+							description={
+								<>Le salon expire le {formatDate(room.expiresAt)}.</>
+							}
+							eyebrow="Salon visio"
+							title={`Hébergé par ${room.hostDisplayName}`}
+							titleAs="h1"
+						/>
 						<div className="flex flex-wrap gap-2">
 							<StatusPill
 								label={
 									room.settings.requireJoinAuth
-										? "Auth required"
-										: "Link join enabled"
+										? "Authentification requise"
+										: "Accès par lien activé"
 								}
 							/>
 							<StatusPill
 								label={
 									room.settings.requireWaitingRoom
-										? "Waiting room on"
-										: "Instant join"
+										? "Salle d'attente active"
+										: "Entrée instantanée"
 								}
 							/>
 							<StatusPill
 								label={
 									room.settingsLocked
-										? "Settings locked"
-										: "Settings editable"
+										? "Réglages verrouillés"
+										: "Réglages modifiables"
 								}
 							/>
 						</div>
 					</div>
 
 					{viewModel.error ? (
-						<p className="mt-4 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+						<Alert className="mt-4" variant="danger">
 							{viewModel.error}
-						</p>
+						</Alert>
 					) : null}
 
 					{viewModel.notice ? (
-						<p className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+						<Alert className="mt-4" variant="warning">
 							{viewModel.notice}
-						</p>
+						</Alert>
 					) : null}
-				</section>
+				</Panel>
 
 				{joinableState ? (
 					<div className="grid gap-6 lg:grid-cols-[1fr_0.95fr]">
 						<section className="space-y-6">
-							<section className="rounded-[1.75rem] border border-stone-900/10 bg-white p-6 shadow-[0_18px_48px_rgba(41,37,36,0.08)]">
-								<p className="font-semibold text-emerald-700 text-sm uppercase tracking-[0.3em]">
-									Join
-								</p>
-								<h2 className="mt-3 font-black text-3xl text-stone-950 tracking-tight">
-									Enter the room.
-								</h2>
+							<Panel>
+								<SectionHeader
+									eyebrow="Rejoindre"
+									title="Entrer dans le salon."
+								/>
 								{joinableState.viewerCanJoin ? (
-									<form className="mt-6 space-y-4" onSubmit={viewModel.handleJoinSubmit}>
-										<label className="block">
-											<span className="mb-2 block font-medium text-sm text-stone-700">
-												Display name
-											</span>
-											<input
-												className="block w-full rounded-2xl border border-stone-300 bg-stone-50 px-4 py-3 text-sm text-stone-900"
+									<form
+										className="mt-6 space-y-4"
+										onSubmit={viewModel.handleJoinSubmit}
+									>
+										<Field
+											htmlFor="visio-join-display-name"
+											label="Nom d'affichage"
+										>
+											<Input
+												id="visio-join-display-name"
 												onChange={(event) => {
 													viewModel.setJoinName(event.target.value);
 												}}
@@ -215,44 +220,45 @@ export function VisioRoomShell(props: {
 												type="text"
 												value={viewModel.joinName}
 											/>
-										</label>
-										<button
-											className="inline-flex items-center rounded-full bg-stone-950 px-5 py-3 font-semibold text-sm text-stone-50 transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:bg-stone-400"
-											disabled={viewModel.isBusy}
-											type="submit"
-										>
-											{viewModel.isBusy ? "Joining..." : "Join room"}
-										</button>
+										</Field>
+										<Button disabled={viewModel.isBusy} type="submit">
+											{viewModel.isBusy ? "Entrée..." : "Rejoindre le salon"}
+										</Button>
 									</form>
 								) : (
-									<div className="mt-6 rounded-[1.5rem] border border-stone-900/10 bg-stone-50 p-5">
-										<h2 className="font-semibold text-xl text-stone-950">
-											Sign in before joining.
+									<div className="mt-6 rounded-lg border border-slate-200 bg-slate-50 p-5">
+										<h2 className="font-semibold text-slate-950 text-xl">
+											Connectez-vous avant de rejoindre.
 										</h2>
-										<p className="mt-2 text-sm text-stone-600 leading-6">
-											This host requires every guest to be authenticated before
-											entering the room.
+										<p className="mt-2 text-slate-600 text-sm leading-6">
+											Cet hôte exige que chaque invité soit authentifié avant
+											d'entrer dans le salon.
 										</p>
-										<button
-											className="mt-4 rounded-full bg-emerald-400 px-5 py-3 font-semibold text-sm text-stone-950 transition hover:bg-emerald-300"
+										<Button
+											className="mt-4"
 											onClick={viewModel.handleSignIn}
 											type="button"
 										>
-											Sign in with GitHub
-										</button>
+											Se connecter avec GitHub
+										</Button>
 									</div>
 								)}
-							</section>
+							</Panel>
 
-							<section className="rounded-[1.75rem] border border-stone-900/10 bg-stone-950 p-6 text-stone-50 shadow-[0_18px_48px_rgba(41,37,36,0.16)]">
-								<p className="font-semibold text-emerald-300 text-sm uppercase tracking-[0.3em]">
-									Room details
-								</p>
-								<p className="mt-4 text-sm text-stone-300 leading-6">
-									Only one guest can be active at a time. If another guest already
-									joined or is waiting, this room will stay full until they leave.
-								</p>
-							</section>
+							<Panel tone="dark">
+								<SectionHeader
+									description={
+										<>
+											Un seul invité peut être actif à la fois. Si un autre
+											invité a déjà rejoint ou attend, ce salon restera plein
+											jusqu'à son départ.
+										</>
+									}
+									eyebrow="Détails du salon"
+									inverted
+									title="Un invité actif"
+								/>
+							</Panel>
 						</section>
 
 						<div>{devicePanel}</div>
@@ -261,25 +267,27 @@ export function VisioRoomShell(props: {
 
 				{pendingState ? (
 					<div className="grid gap-6 lg:grid-cols-[0.95fr_1.05fr]">
-						<section className="rounded-[1.75rem] border border-amber-200 bg-white p-6 shadow-[0_18px_48px_rgba(41,37,36,0.08)]">
-							<p className="font-semibold text-amber-700 text-sm uppercase tracking-[0.3em]">
-								Waiting room
-							</p>
-							<h2 className="mt-3 font-black text-3xl text-stone-950 tracking-tight">
-								Waiting for the host to admit you.
-							</h2>
-							<p className="mt-3 max-w-2xl text-sm text-stone-600 leading-6">
-								You joined as {pendingState.self.displayName}. Keep this page open
-								while the host reviews your request.
-							</p>
-							<button
-								className="mt-6 rounded-full border border-stone-300 px-5 py-3 font-semibold text-sm text-stone-900 transition hover:border-stone-500"
+						<Panel className="border-amber-200">
+							<SectionHeader
+								description={
+									<>
+										Vous avez rejoint en tant que{" "}
+										{pendingState.self.displayName}. Gardez cette page ouverte
+										pendant que l'hôte examine votre demande.
+									</>
+								}
+								eyebrow="Salle d'attente"
+								title="En attente de l'admission par l'hôte."
+							/>
+							<Button
+								className="mt-6"
 								onClick={viewModel.handleLeave}
 								type="button"
+								variant="secondary"
 							>
-								Leave waiting room
-							</button>
-						</section>
+								Quitter la salle d'attente
+							</Button>
+						</Panel>
 
 						<div>{devicePanel}</div>
 					</div>
@@ -290,85 +298,96 @@ export function VisioRoomShell(props: {
 						<section className="space-y-6">
 							<div className="grid gap-6 md:grid-cols-2">
 								<VideoPanel
-									label={inCallState.self.role === "host" ? "Host" : "You"}
+									label={inCallState.self.role === "host" ? "Hôte" : "Vous"}
 									name={inCallState.self.displayName}
 									status={
 										viewModel.hasLocalMedia
-											? "Local devices are ready"
-											: "Media preview is still off"
+											? "Les périphériques locaux sont prêts"
+											: "L'aperçu média est encore désactivé"
 									}
 									videoRef={viewModel.localVideoRef}
 								/>
 								<VideoPanel
-									label="Remote"
-									name={inCallState.peer?.displayName ?? "Waiting for peer"}
+									label="Distant"
+									name={inCallState.peer?.displayName ?? "En attente du pair"}
 									status={
 										viewModel.hasRemoteMedia
-											? `Connection ${viewModel.connectionState}`
-											: "No remote stream yet"
+											? `Connexion ${viewModel.connectionState}`
+											: "Aucun flux distant pour le moment"
 									}
 									videoRef={viewModel.remoteVideoRef}
 								/>
 							</div>
 
-							<section className="rounded-[1.75rem] border border-stone-900/10 bg-white p-6 shadow-[0_18px_48px_rgba(41,37,36,0.08)]">
-								<p className="font-semibold text-emerald-700 text-sm uppercase tracking-[0.3em]">
-									Call controls
-								</p>
+							<Panel>
+								<SectionHeader
+									eyebrow="Contrôles d'appel"
+									title="Gérer l'appel"
+								/>
 								<div className="mt-5 flex flex-wrap gap-3">
-									<button
-										className="rounded-full bg-stone-950 px-5 py-3 font-semibold text-sm text-stone-50 transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:bg-stone-400"
-										disabled={viewModel.isBusy || viewModel.previewStatus === "requesting"}
+									<Button
+										disabled={
+											viewModel.isBusy ||
+											viewModel.previewStatus === "requesting"
+										}
 										onClick={() => {
 											void viewModel.handleStartPreview();
 										}}
 										type="button"
 									>
 										{viewModel.previewStatus === "requesting"
-											? "Requesting media..."
+											? "Demande des médias..."
 											: viewModel.hasLocalMedia
-												? "Restart local preview"
-												: "Enable camera and microphone"}
-									</button>
-									<button
-										className="rounded-full border border-stone-300 px-5 py-3 font-semibold text-sm text-stone-900 transition hover:border-stone-500 disabled:cursor-not-allowed disabled:opacity-60"
+												? "Relancer l'aperçu local"
+												: "Activer caméra et microphone"}
+									</Button>
+									<Button
 										disabled={!viewModel.hasLocalMedia}
 										onClick={() => {
 											viewModel.handleToggleTrack("audio");
 										}}
 										type="button"
+										variant="secondary"
 									>
-										{viewModel.isMicEnabled ? "Mute microphone" : "Unmute microphone"}
-									</button>
-									<button
-										className="rounded-full border border-stone-300 px-5 py-3 font-semibold text-sm text-stone-900 transition hover:border-stone-500 disabled:cursor-not-allowed disabled:opacity-60"
+										{viewModel.isMicEnabled
+											? "Couper le microphone"
+											: "Activer le microphone"}
+									</Button>
+									<Button
 										disabled={!viewModel.hasLocalMedia}
 										onClick={() => {
 											viewModel.handleToggleTrack("video");
 										}}
 										type="button"
+										variant="secondary"
 									>
-										{viewModel.isCameraEnabled ? "Turn camera off" : "Turn camera on"}
-									</button>
-									<button
-										className="rounded-full border border-red-200 px-5 py-3 font-semibold text-sm text-red-700 transition hover:bg-red-50"
+										{viewModel.isCameraEnabled
+											? "Désactiver la caméra"
+											: "Activer la caméra"}
+									</Button>
+									<Button
 										onClick={viewModel.handleLeave}
 										type="button"
+										variant="danger"
 									>
-										{inCallState.self.role === "host" ? "End room" : "Leave room"}
-									</button>
+										{inCallState.self.role === "host"
+											? "Terminer le salon"
+											: "Quitter le salon"}
+									</Button>
 								</div>
-							</section>
+							</Panel>
 						</section>
 
 						<section className="space-y-6">
 							{devicePanel}
 
-							<section className="rounded-[1.75rem] border border-stone-900/10 bg-stone-950 p-6 text-stone-50 shadow-[0_18px_48px_rgba(41,37,36,0.16)]">
-								<p className="font-semibold text-emerald-300 text-sm uppercase tracking-[0.3em]">
-									Share room
-								</p>
-								<p className="mt-4 break-all text-sm text-emerald-200 leading-6">
+							<Panel tone="dark">
+								<SectionHeader
+									eyebrow="Partager le salon"
+									inverted
+									title="Lien d'invitation"
+								/>
+								<p className="mt-4 break-all text-sky-200 text-sm leading-6">
 									{typeof window === "undefined"
 										? inCallState.room.sharePath
 										: new URL(
@@ -376,106 +395,104 @@ export function VisioRoomShell(props: {
 												window.location.origin,
 											).toString()}
 								</p>
-								<button
-									className="mt-4 rounded-full bg-emerald-400 px-5 py-3 font-semibold text-sm text-stone-950 transition hover:bg-emerald-300"
+								<Button
+									className="mt-4 bg-white text-slate-900 hover:bg-slate-100"
 									onClick={() => {
 										void viewModel.handleCopyLink();
 									}}
 									type="button"
 								>
-									{viewModel.isCopied ? "Link copied" : "Copy room link"}
-								</button>
-							</section>
+									{viewModel.isCopied
+										? "Lien copié"
+										: "Copier le lien du salon"}
+								</Button>
+							</Panel>
 
 							{inCallState.self.role === "host" ? (
 								<>
-									{!inCallState.room.settingsLocked && viewModel.settingsDraft ? (
-										<form
-											className="rounded-[1.75rem] border border-stone-900/10 bg-white p-6 shadow-[0_18px_48px_rgba(41,37,36,0.08)]"
-											onSubmit={viewModel.handleSettingsSubmit}
-										>
-											<p className="font-semibold text-emerald-700 text-sm uppercase tracking-[0.3em]">
-												Room gates
-											</p>
+									{!inCallState.room.settingsLocked && settingsDraft ? (
+										<FormPanel onSubmit={viewModel.handleSettingsSubmit}>
+											<SectionHeader
+												eyebrow="Accès du salon"
+												title="Réglages d'accès"
+											/>
 											<div className="mt-5 space-y-3">
-												<label className="flex items-start gap-3 rounded-2xl border border-stone-200 bg-stone-50 px-4 py-4">
-													<input
-														checked={viewModel.settingsDraft.requireJoinAuth}
-														className="mt-1 size-4"
-														onChange={(event) => {
-															viewModel.setSettingsDraft({
-																...viewModel.settingsDraft!,
-																requireJoinAuth: event.target.checked,
-															});
-														}}
-														type="checkbox"
-													/>
-													<span className="text-sm text-stone-700">
-														Require guests to sign in before joining
-													</span>
-												</label>
-												<label className="flex items-start gap-3 rounded-2xl border border-stone-200 bg-stone-50 px-4 py-4">
-													<input
-														checked={viewModel.settingsDraft.requireWaitingRoom}
-														className="mt-1 size-4"
-														onChange={(event) => {
-															viewModel.setSettingsDraft({
-																...viewModel.settingsDraft!,
-																requireWaitingRoom: event.target.checked,
-															});
-														}}
-														type="checkbox"
-													/>
-													<span className="text-sm text-stone-700">
-														Require host approval before the call starts
-													</span>
-												</label>
+												<CheckboxRow
+													checked={settingsDraft.requireJoinAuth}
+													onChange={(event) => {
+														viewModel.setSettingsDraft({
+															...settingsDraft,
+															requireJoinAuth: event.target.checked,
+														});
+													}}
+													type="controlled"
+												>
+													Exiger la connexion des invités avant l'entrée
+												</CheckboxRow>
+												<CheckboxRow
+													checked={settingsDraft.requireWaitingRoom}
+													onChange={(event) => {
+														viewModel.setSettingsDraft({
+															...settingsDraft,
+															requireWaitingRoom: event.target.checked,
+														});
+													}}
+													type="controlled"
+												>
+													Exiger l'approbation de l'hôte avant le début de
+													l'appel
+												</CheckboxRow>
 											</div>
-											<button
-												className="mt-5 rounded-full bg-stone-950 px-5 py-3 font-semibold text-sm text-stone-50 transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:bg-stone-400"
+											<Button
+												className="mt-5"
 												disabled={viewModel.isBusy}
 												type="submit"
 											>
-												{viewModel.isBusy ? "Saving..." : "Save room settings"}
-											</button>
-										</form>
+												{viewModel.isBusy
+													? "Enregistrement..."
+													: "Enregistrer les réglages du salon"}
+											</Button>
+										</FormPanel>
 									) : null}
 
 									{inCallState.pendingGuest ? (
-										<section className="rounded-[1.75rem] border border-amber-200 bg-white p-6 shadow-[0_18px_48px_rgba(41,37,36,0.08)]">
-											<p className="font-semibold text-amber-700 text-sm uppercase tracking-[0.3em]">
-												Waiting room
-											</p>
-											<h2 className="mt-3 font-semibold text-2xl text-stone-950">
-												{inCallState.pendingGuest.displayName} wants to join.
-											</h2>
+										<Panel className="border-amber-200">
+											<SectionHeader
+												eyebrow="Salle d'attente"
+												title={`${inCallState.pendingGuest.displayName} souhaite rejoindre.`}
+											/>
 											<div className="mt-5 flex flex-wrap gap-3">
-												<button
-													className="rounded-full bg-stone-950 px-5 py-3 font-semibold text-sm text-stone-50 transition hover:bg-emerald-700"
+												<Button
 													onClick={() => {
+														if (!inCallState.pendingGuest) {
+															return;
+														}
 														viewModel.handleAdmissionDecision(
-															inCallState.pendingGuest!.participantId,
+															inCallState.pendingGuest.participantId,
 															"approve",
 														);
 													}}
 													type="button"
 												>
-													Approve guest
-												</button>
-												<button
-													className="rounded-full border border-red-200 px-5 py-3 font-semibold text-sm text-red-700 transition hover:bg-red-50"
+													Approuver l'invité
+												</Button>
+												<Button
 													onClick={() => {
+														if (!inCallState.pendingGuest) {
+															return;
+														}
 														viewModel.handleAdmissionDecision(
-															inCallState.pendingGuest!.participantId,
+															inCallState.pendingGuest.participantId,
 															"reject",
 														);
 													}}
 													type="button"
+													variant="danger"
 												>
-													Reject guest
-												</button>
+													Refuser l'invité
+												</Button>
 											</div>
-										</section>
+										</Panel>
 									) : null}
 								</>
 							) : null}
@@ -484,49 +501,41 @@ export function VisioRoomShell(props: {
 				) : null}
 
 				{fullState ? (
-					<section className="rounded-[1.75rem] border border-red-200 bg-white p-6 shadow-[0_18px_48px_rgba(41,37,36,0.08)]">
-						<p className="font-semibold text-red-700 text-sm uppercase tracking-[0.3em]">
-							Room full
-						</p>
-						<h2 className="mt-3 font-black text-3xl text-stone-950 tracking-tight">
-							Another guest is already using this room.
-						</h2>
-						<p className="mt-3 max-w-2xl text-sm text-stone-600 leading-6">
-							Only one guest can be active at a time. Try again after the current
-							guest leaves or the host rejects the pending request.
-						</p>
-					</section>
+					<Panel className="border-red-200">
+						<SectionHeader
+							description="Un seul invité peut être actif à la fois. Réessayez après le départ de l'invité actuel ou le refus de la demande en attente par l'hôte."
+							eyebrow="Salon plein"
+							title="Un autre invité utilise déjà ce salon."
+						/>
+					</Panel>
 				) : null}
 
 				{rejectedState ? (
-					<section className="rounded-[1.75rem] border border-red-200 bg-white p-6 shadow-[0_18px_48px_rgba(41,37,36,0.08)]">
-						<p className="font-semibold text-red-700 text-sm uppercase tracking-[0.3em]">
-							Rejected
-						</p>
-						<h2 className="mt-3 font-black text-3xl text-stone-950 tracking-tight">
-							The host did not admit this request.
-						</h2>
-						<p className="mt-3 max-w-2xl text-sm text-stone-600 leading-6">
-							You were in the room as {rejectedState.self.displayName}. Ask the
-							host for a new invitation if you still need to join.
-						</p>
-					</section>
+					<Panel className="border-red-200">
+						<SectionHeader
+							description={
+								<>
+									Vous étiez dans le salon en tant que{" "}
+									{rejectedState.self.displayName}. Demandez une nouvelle
+									invitation à l'hôte si vous devez encore rejoindre.
+								</>
+							}
+							eyebrow="Refusé"
+							title="L'hôte n'a pas admis cette demande."
+						/>
+					</Panel>
 				) : null}
 
 				{expiredState ? (
-					<section className="rounded-[1.75rem] border border-amber-200 bg-white p-6 shadow-[0_18px_48px_rgba(41,37,36,0.08)]">
-						<p className="font-semibold text-amber-700 text-sm uppercase tracking-[0.3em]">
-							Expired
-						</p>
-						<h2 className="mt-3 font-black text-3xl text-stone-950 tracking-tight">
-							This visio room expired.
-						</h2>
-						<p className="mt-3 max-w-2xl text-sm text-stone-600 leading-6">
-							Rooms automatically close after 24 hours for the local-first MVP.
-						</p>
-					</section>
+					<Panel className="border-amber-200">
+						<SectionHeader
+							description="Les salons se ferment automatiquement après 24 heures pour le MVP local-first."
+							eyebrow="Expiré"
+							title="Ce salon visio a expiré."
+						/>
+					</Panel>
 				) : null}
-			</div>
-		</main>
+			</PageContainer>
+		</PageShell>
 	);
 }

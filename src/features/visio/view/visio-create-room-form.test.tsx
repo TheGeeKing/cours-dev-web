@@ -9,7 +9,7 @@ describe("VisioCreateRoomForm", () => {
 
 		expect(screen.getByDisplayValue("Alice Host")).toBeInTheDocument();
 		expect(
-			screen.getByRole("button", { name: "Create room" }),
+			screen.getByRole("button", { name: "Créer le salon" }),
 		).toBeInTheDocument();
 	});
 });

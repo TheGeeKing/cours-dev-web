@@ -6,9 +6,9 @@ import { Geist } from "next/font/google";
 import { TRPCProvider } from "@/trpc/client";
 
 export const metadata: Metadata = {
-	title: "Modular Exam Web Application",
+	title: "Application web d'examen modulaire",
 	description:
-		"Exam-oriented full-stack application built with Next.js, tRPC, Drizzle, and Better Auth.",
+		"Application full-stack orientée examen, construite avec Next.js, tRPC, Drizzle et Better Auth.",
 	icons: [{ rel: "icon", url: "/favicon.ico" }],
 };
 
@@ -21,7 +21,7 @@ export default function RootLayout({
 	children,
 }: Readonly<{ children: React.ReactNode }>) {
 	return (
-		<html className={`${geist.variable}`} lang="en">
+		<html className={`${geist.variable}`} lang="fr">
 			<body>
 				<TRPCProvider>{children}</TRPCProvider>
 			</body>

@@ -27,12 +27,15 @@ export async function GET(
 		});
 	} catch (error) {
 		if (isTransferError(error)) {
-			return Response.json({ error: error.message }, { status: error.statusCode });
+			return Response.json(
+				{ error: error.message },
+				{ status: error.statusCode },
+			);
 		}
 
 		console.error("transfer download failed", error);
 		return Response.json(
-			{ error: "Download failed due to a server error." },
+			{ error: "Le téléchargement a échoué à cause d'une erreur serveur." },
 			{ status: 500 },
 		);
 	}

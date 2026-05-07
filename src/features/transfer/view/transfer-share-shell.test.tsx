@@ -23,8 +23,12 @@ describe("TransferShareShell", () => {
 			/>,
 		);
 
-		expect(screen.getByRole("heading", { name: "report.pdf" })).toBeInTheDocument();
-		expect(screen.getByRole("link", { name: "Download file" })).toBeInTheDocument();
+		expect(
+			screen.getByRole("heading", { name: "report.pdf" }),
+		).toBeInTheDocument();
+		expect(
+			screen.getByRole("link", { name: "Télécharger le fichier" }),
+		).toBeInTheDocument();
 	});
 
 	it("renders the expired state clearly", () => {
@@ -39,7 +43,7 @@ describe("TransferShareShell", () => {
 		);
 
 		expect(
-			screen.getByRole("heading", { name: "This transfer link has expired." }),
+			screen.getByRole("heading", { name: "Ce lien de transfert a expiré." }),
 		).toBeInTheDocument();
 	});
 });

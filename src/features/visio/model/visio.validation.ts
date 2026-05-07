@@ -11,11 +11,11 @@ const displayNameSchema = z
 	.trim()
 	.min(
 		VISIO_DISPLAY_NAME_MIN_LENGTH,
-		`Display names must be at least ${VISIO_DISPLAY_NAME_MIN_LENGTH} characters.`,
+		`Les noms d'affichage doivent contenir au moins ${VISIO_DISPLAY_NAME_MIN_LENGTH} caractères.`,
 	)
 	.max(
 		VISIO_DISPLAY_NAME_MAX_LENGTH,
-		`Display names must stay under ${VISIO_DISPLAY_NAME_MAX_LENGTH} characters.`,
+		`Les noms d'affichage doivent rester sous ${VISIO_DISPLAY_NAME_MAX_LENGTH} caractères.`,
 	);
 
 const roomSettingsSchema = z.object({
@@ -79,7 +79,8 @@ const parseOrThrow = <T>(schema: z.ZodSchema<T>, input: unknown) => {
 
 	if (!parsed.success) {
 		throw new VisioError(
-			parsed.error.issues[0]?.message ?? "Request validation failed.",
+			parsed.error.issues[0]?.message ??
+				"La validation de la requête a échoué.",
 			400,
 			"BAD_REQUEST",
 		);

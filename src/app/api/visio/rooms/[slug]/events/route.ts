@@ -5,8 +5,11 @@ import {
 	VISIO_EVENTS_HEARTBEAT_INTERVAL_MS,
 	VISIO_EVENTS_POLL_INTERVAL_MS,
 } from "@/features/visio/model/visio.constants";
-import { getVisioEventsSince, getVisioStreamContext } from "@/features/visio/model/visio.service";
 import { isVisioError } from "@/features/visio/model/visio.errors";
+import {
+	getVisioEventsSince,
+	getVisioStreamContext,
+} from "@/features/visio/model/visio.service";
 import { auth } from "@/server/better-auth";
 
 export const runtime = "nodejs";
@@ -121,7 +124,7 @@ export async function GET(
 
 		console.error("visio events stream failed", error);
 		return Response.json(
-			{ error: "Streaming the room events failed." },
+			{ error: "La diffusion des événements du salon a échoué." },
 			{ status: 500 },
 		);
 	}

@@ -1,7 +1,7 @@
-import { auth } from "@/server/better-auth";
 import { isTransferError } from "@/features/transfer/model/transfer.errors";
 import { saveUploadedTransferFile } from "@/features/transfer/model/transfer.service";
 import { getTransferUploadFile } from "@/features/transfer/model/transfer.validation";
+import { auth } from "@/server/better-auth";
 
 export const runtime = "nodejs";
 
@@ -11,7 +11,10 @@ export async function POST(request: Request) {
 	});
 
 	if (!session?.user) {
-		return Response.json({ error: "Sign in to upload files." }, { status: 401 });
+		return Response.json(
+			{ error: "Connectez-vous pour envoyer des fichiers." },
+			{ status: 401 },
+		);
 	}
 
 	try {
@@ -25,12 +28,15 @@ export async function POST(request: Request) {
 		return Response.json(response, { status: 201 });
 	} catch (error) {
 		if (isTransferError(error)) {
-			return Response.json({ error: error.message }, { status: error.statusCode });
+			return Response.json(
+				{ error: error.message },
+				{ status: error.statusCode },
+			);
 		}
 
 		console.error("transfer upload failed", error);
 		return Response.json(
-			{ error: "Upload failed due to a server error." },
+			{ error: "L'envoi a échoué à cause d'une erreur serveur." },
 			{ status: 500 },
 		);
 	}

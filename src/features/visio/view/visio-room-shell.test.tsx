@@ -122,15 +122,17 @@ describe("VisioRoomShell", () => {
 		);
 
 		expect(
-			screen.getByRole("button", { name: "Sign in with GitHub" }),
+			screen.getByRole("button", { name: "Se connecter avec GitHub" }),
 		).toBeInTheDocument();
 		expect(
 			screen.getByRole("heading", {
-				name: "Test your setup before the call.",
+				name: "Tester votre configuration avant l'appel.",
 			}),
 		).toBeInTheDocument();
 		expect(
-			screen.getByText("Speaker output selection is not supported in this browser."),
+			screen.getByText(
+				"La sélection de sortie audio n'est pas prise en charge dans ce navigateur.",
+			),
 		).toBeInTheDocument();
 	});
 
@@ -202,10 +204,10 @@ describe("VisioRoomShell", () => {
 		);
 
 		expect(
-			screen.getByRole("button", { name: "Approve guest" }),
+			screen.getByRole("button", { name: "Approuver l'invité" }),
 		).toBeInTheDocument();
-		expect(screen.getAllByRole("button", { name: "Test speaker" }).length).toBe(
-			2,
-		);
+		expect(
+			screen.getAllByRole("button", { name: "Tester le haut-parleur" }).length,
+		).toBe(2);
 	});
 });

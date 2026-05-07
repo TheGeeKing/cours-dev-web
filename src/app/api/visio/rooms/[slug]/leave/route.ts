@@ -34,7 +34,7 @@ export async function POST(
 	} catch (error) {
 		return createVisioErrorResponse(
 			error,
-			"Leaving the room failed due to a server error.",
+			"La sortie du salon a échoué à cause d'une erreur serveur.",
 			"visio leave failed",
 		);
 	}

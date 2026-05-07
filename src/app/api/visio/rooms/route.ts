@@ -19,7 +19,7 @@ export async function POST(request: Request) {
 
 	if (!session?.user) {
 		return Response.json(
-			{ error: "Sign in before creating a visio room." },
+			{ error: "Connectez-vous avant de créer un salon visio." },
 			{ status: 401 },
 		);
 	}
@@ -32,19 +32,23 @@ export async function POST(request: Request) {
 		});
 
 		const cookieStore = await cookies();
-		cookieStore.set(getVisioParticipantCookieName(response.slug), participantToken, {
-			httpOnly: true,
-			sameSite: "lax",
-			secure: env.NODE_ENV === "production",
-			path: "/",
-			maxAge: VISIO_ROOM_RETENTION_MS / 1000,
-		});
+		cookieStore.set(
+			getVisioParticipantCookieName(response.slug),
+			participantToken,
+			{
+				httpOnly: true,
+				sameSite: "lax",
+				secure: env.NODE_ENV === "production",
+				path: "/",
+				maxAge: VISIO_ROOM_RETENTION_MS / 1000,
+			},
+		);
 
 		return Response.json(response, { status: 201 });
 	} catch (error) {
 		return createVisioErrorResponse(
 			error,
-			"Room creation failed due to a server error.",
+			"La création du salon a échoué à cause d'une erreur serveur.",
 			"visio room creation failed",
 		);
 	}

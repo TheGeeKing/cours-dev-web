@@ -12,7 +12,7 @@ describe("getTransferUploadFile", () => {
 
 		expect(() => getTransferUploadFile(formData)).toThrow(TransferError);
 		expect(() => getTransferUploadFile(formData)).toThrow(
-			"Upload exactly one file to create a transfer link.",
+			"Envoyez exactement un fichier pour créer un lien de transfert.",
 		);
 	});
 
@@ -22,7 +22,7 @@ describe("getTransferUploadFile", () => {
 		formData.append(TRANSFER_FILE_FIELD_NAME, new File(["b"], "b.txt"));
 
 		expect(() => getTransferUploadFile(formData)).toThrow(
-			"Upload exactly one file to create a transfer link.",
+			"Envoyez exactement un fichier pour créer un lien de transfert.",
 		);
 	});
 
@@ -37,7 +37,7 @@ describe("getTransferUploadFile", () => {
 		formData.append(TRANSFER_FILE_FIELD_NAME, oversizedFile);
 
 		expect(() => getTransferUploadFile(formData)).toThrow(
-			"Files must be 100 MB or smaller.",
+			"Les fichiers doivent faire 100 Mo ou moins.",
 		);
 	});
 });

@@ -7,16 +7,14 @@ import {
 import { TransferError } from "./transfer.errors";
 
 const transferUploadValidationSchema = z.object({
-	fileCount: z
-		.number()
-		.refine((value) => value === 1, {
-			message: "Upload exactly one file to create a transfer link.",
-		}),
+	fileCount: z.number().refine((value) => value === 1, {
+		message: "Envoyez exactement un fichier pour créer un lien de transfert.",
+	}),
 	fileSize: z
 		.number()
 		.max(
 			TRANSFER_MAX_FILE_SIZE_BYTES,
-			`Files must be 100 MB or smaller.`,
+			`Les fichiers doivent faire 100 Mo ou moins.`,
 		),
 });
 
@@ -26,13 +24,15 @@ export const getTransferUploadFile = (formData: FormData) => {
 	const parsedEntryCount = transferUploadValidationSchema.safeParse({
 		fileCount: entries.length,
 		fileSize:
-			entries[0] instanceof File ? entries[0].size : TRANSFER_MAX_FILE_SIZE_BYTES + 1,
+			entries[0] instanceof File
+				? entries[0].size
+				: TRANSFER_MAX_FILE_SIZE_BYTES + 1,
 	});
 
 	if (!parsedEntryCount.success) {
 		throw new TransferError(
 			parsedEntryCount.error.issues[0]?.message ??
-				"Upload validation failed.",
+				"La validation de l'envoi a échoué.",
 			400,
 			"BAD_REQUEST",
 		);
@@ -40,7 +40,7 @@ export const getTransferUploadFile = (formData: FormData) => {
 
 	const [entry] = entries;
 	if (!(entry instanceof File)) {
-		throw new TransferError("A file upload is required.", 400, "BAD_REQUEST");
+		throw new TransferError("Un fichier est requis.", 400, "BAD_REQUEST");
 	}
 
 	return entry;

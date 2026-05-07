@@ -33,7 +33,7 @@ export async function POST(
 	} catch (error) {
 		return createVisioErrorResponse(
 			error,
-			"Signal delivery failed due to a server error.",
+			"L'envoi du signal a échoué à cause d'une erreur serveur.",
 			"visio signal failed",
 		);
 	}

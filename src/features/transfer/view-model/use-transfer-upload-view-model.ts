@@ -40,13 +40,13 @@ export const useTransferUploadViewModel = (): UploadState => {
 			setResult(null);
 			const errorMessage =
 				payload && "error" in payload ? payload.error : undefined;
-			setError(errorMessage ?? "Upload failed. Please try again.");
+			setError(errorMessage ?? "L'envoi a échoué. Veuillez réessayer.");
 			return;
 		}
 
 		if (!payload || !("sharePath" in payload)) {
 			setResult(null);
-			setError("Upload succeeded, but no share link was returned.");
+			setError("L'envoi a réussi, mais aucun lien de partage n'a été renvoyé.");
 			return;
 		}
 
@@ -61,7 +61,7 @@ export const useTransferUploadViewModel = (): UploadState => {
 		const formData = new FormData(event.currentTarget);
 
 		if (!(formData.get(TRANSFER_FILE_FIELD_NAME) instanceof File)) {
-			setError("Choose one file before uploading.");
+			setError("Choisissez un fichier avant l'envoi.");
 			setResult(null);
 			return;
 		}
@@ -80,7 +80,9 @@ export const useTransferUploadViewModel = (): UploadState => {
 			await navigator.clipboard.writeText(result.shareUrl);
 			setIsCopied(true);
 		} catch {
-			setError("Copy failed. You can still copy the link manually.");
+			setError(
+				"La copie a échoué. Vous pouvez toujours copier le lien manuellement.",
+			);
 		}
 	};
 

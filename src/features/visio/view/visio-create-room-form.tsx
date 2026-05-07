@@ -3,9 +3,22 @@
 import Link from "next/link";
 
 import { useVisioCreateRoomViewModel } from "@/features/visio/view-model/use-visio-create-room-view-model";
+import {
+	Alert,
+	Button,
+	buttonClasses,
+	CheckboxRow,
+	DataList,
+	Field,
+	FormPanel,
+	InfoItem,
+	Input,
+	Panel,
+	SectionHeader,
+} from "@/shared/ui";
 
 const formatDate = (value: string) =>
-	new Intl.DateTimeFormat("en", {
+	new Intl.DateTimeFormat("fr-FR", {
 		dateStyle: "medium",
 		timeStyle: "short",
 	}).format(new Date(value));
@@ -15,151 +28,141 @@ export function VisioCreateRoomForm(props: { defaultDisplayName: string }) {
 
 	return (
 		<div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
-			<form
-				className="rounded-[1.75rem] border border-stone-900/10 bg-white p-6 shadow-[0_18px_48px_rgba(41,37,36,0.08)]"
-				onSubmit={viewModel.handleSubmit}
-			>
-				<div className="space-y-3">
-					<p className="font-semibold text-emerald-700 text-sm uppercase tracking-[0.3em]">
-						Host workspace
-					</p>
-					<h1 className="font-black text-3xl text-stone-950 tracking-tight">
-						Create a one-to-one video room.
-					</h1>
-					<p className="max-w-xl text-sm text-stone-600 leading-6">
-						Set your display name, choose the room gates you want, and create a
-						share link for the guest.
-					</p>
-				</div>
+			<FormPanel onSubmit={viewModel.handleSubmit}>
+				<SectionHeader
+					description={
+						<>
+							Définissez votre nom d'affichage, choisissez les conditions
+							d'accès du salon et créez un lien de partage pour l'invité.
+						</>
+					}
+					eyebrow="Espace hôte"
+					title="Créer un salon vidéo individuel."
+					titleAs="h1"
+				/>
 
-				<label className="mt-6 block">
-					<span className="mb-2 block font-medium text-sm text-stone-700">
-						Host display name
-					</span>
-					<input
-						className="block w-full rounded-2xl border border-stone-300 bg-stone-50 px-4 py-3 text-sm text-stone-900"
+				<Field
+					className="mt-6"
+					htmlFor="visio-host-display-name"
+					label="Nom d'affichage de l'hôte"
+				>
+					<Input
 						defaultValue={props.defaultDisplayName}
+						id="visio-host-display-name"
 						name="hostDisplayName"
 						required
 						type="text"
 					/>
-				</label>
+				</Field>
 
 				<div className="mt-6 space-y-3">
-					<label className="flex items-start gap-3 rounded-2xl border border-stone-200 bg-stone-50 px-4 py-4">
-						<input
-							className="mt-1 size-4"
-							name="requireJoinAuth"
-							type="checkbox"
-						/>
-						<span>
-							<span className="block font-medium text-sm text-stone-900">
-								Require sign-in for guests
-							</span>
-							<span className="mt-1 block text-sm text-stone-600 leading-6">
-								Anyone with the link can still reach the room page, but joining
-								the call will require GitHub auth.
-							</span>
+					<CheckboxRow name="requireJoinAuth">
+						<span className="block font-medium text-slate-900">
+							Exiger la connexion des invités
 						</span>
-					</label>
+						<span className="mt-1 block text-slate-600">
+							Toute personne ayant le lien peut toujours ouvrir la page du
+							salon, mais rejoindre l'appel demandera une authentification
+							GitHub.
+						</span>
+					</CheckboxRow>
 
-					<label className="flex items-start gap-3 rounded-2xl border border-stone-200 bg-stone-50 px-4 py-4">
-						<input
-							className="mt-1 size-4"
-							name="requireWaitingRoom"
-							type="checkbox"
-						/>
-						<span>
-							<span className="block font-medium text-sm text-stone-900">
-								Enable a waiting room
-							</span>
-							<span className="mt-1 block text-sm text-stone-600 leading-6">
-								Guests enter a pending state until you approve them from the
-								room page.
-							</span>
+					<CheckboxRow name="requireWaitingRoom">
+						<span className="block font-medium text-slate-900">
+							Activer une salle d'attente
 						</span>
-					</label>
+						<span className="mt-1 block text-slate-600">
+							Les invités restent en attente jusqu'à votre approbation depuis la
+							page du salon.
+						</span>
+					</CheckboxRow>
 				</div>
 
 				{viewModel.error ? (
-					<p className="mt-4 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+					<Alert className="mt-4" variant="danger">
 						{viewModel.error}
-					</p>
+					</Alert>
 				) : null}
 
-				<button
-					className="mt-6 inline-flex items-center rounded-full bg-stone-950 px-5 py-3 font-semibold text-sm text-stone-50 transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:bg-stone-400"
-					disabled={viewModel.isPending}
-					type="submit"
-				>
-					{viewModel.isPending ? "Creating room..." : "Create room"}
-				</button>
-			</form>
+				<Button className="mt-6" disabled={viewModel.isPending} type="submit">
+					{viewModel.isPending ? "Création du salon..." : "Créer le salon"}
+				</Button>
+			</FormPanel>
 
-			<section className="rounded-[1.75rem] border border-stone-900/10 bg-stone-950 p-6 text-stone-50 shadow-[0_18px_48px_rgba(41,37,36,0.16)]">
-				<p className="font-semibold text-emerald-300 text-sm uppercase tracking-[0.3em]">
-					Share
-				</p>
+			<Panel tone="dark">
 				{viewModel.result ? (
 					<div className="mt-4 space-y-4">
-						<div>
-							<h2 className="font-semibold text-2xl">
-								Room ready for {viewModel.result.hostDisplayName}
-							</h2>
-							<p className="mt-2 text-sm text-stone-300 leading-6">
-								The room stays available until{" "}
-								{formatDate(viewModel.result.expiresAt)} unless you end it first.
-							</p>
-						</div>
-						<dl className="grid gap-3 text-sm">
-							<div className="rounded-2xl border border-stone-50/10 bg-stone-900 px-4 py-3">
-								<dt className="text-stone-400">Guest access</dt>
-								<dd className="mt-1 font-medium">
-									{viewModel.result.settings.requireJoinAuth
-										? "Signed-in guests only"
-										: "Anyone with the link can join"}
-								</dd>
-							</div>
-							<div className="rounded-2xl border border-stone-50/10 bg-stone-900 px-4 py-3">
-								<dt className="text-stone-400">Admission</dt>
-								<dd className="mt-1 font-medium">
-									{viewModel.result.settings.requireWaitingRoom
-										? "Manual host approval"
-										: "Immediate join"}
-								</dd>
-							</div>
-							<div className="rounded-2xl border border-stone-50/10 bg-stone-900 px-4 py-3">
-								<dt className="text-stone-400">Room link</dt>
-								<dd className="mt-2 break-all font-medium text-emerald-200">
-									{viewModel.result.shareUrl}
-								</dd>
-							</div>
-						</dl>
+						<SectionHeader
+							description={
+								<>
+									Le salon reste disponible jusqu'au{" "}
+									{formatDate(viewModel.result.expiresAt)} sauf si vous y mettez
+									fin avant.
+								</>
+							}
+							eyebrow="Partage"
+							inverted
+							title={`Salon prêt pour ${viewModel.result.hostDisplayName}`}
+						/>
+						<DataList className="sm:grid-cols-1">
+							<InfoItem
+								inverted
+								label="Accès invité"
+								value={
+									viewModel.result.settings.requireJoinAuth
+										? "Invités connectés uniquement"
+										: "Toute personne avec le lien peut rejoindre"
+								}
+							/>
+							<InfoItem
+								inverted
+								label="Admission"
+								value={
+									viewModel.result.settings.requireWaitingRoom
+										? "Approbation manuelle par l'hôte"
+										: "Entrée immédiate"
+								}
+							/>
+							<InfoItem
+								inverted
+								label="Lien du salon"
+								value={
+									<span className="break-all text-sky-200">
+										{viewModel.result.shareUrl}
+									</span>
+								}
+							/>
+						</DataList>
 						<div className="flex flex-wrap gap-3">
-							<button
-								className="rounded-full bg-emerald-400 px-5 py-3 font-semibold text-sm text-stone-950 transition hover:bg-emerald-300"
+							<Button
+								className="bg-white text-slate-900 hover:bg-slate-100"
 								onClick={() => {
 									void viewModel.handleCopyLink();
 								}}
 								type="button"
 							>
-								{viewModel.isCopied ? "Link copied" : "Copy room link"}
-							</button>
+								{viewModel.isCopied ? "Lien copié" : "Copier le lien du salon"}
+							</Button>
 							<Link
-								className="inline-flex items-center rounded-full border border-stone-50/20 px-5 py-3 font-semibold text-sm text-stone-50 transition hover:border-emerald-300 hover:text-emerald-200"
+								className={buttonClasses(
+									"secondary",
+									"border-slate-700 bg-slate-900 text-white hover:border-slate-500 hover:bg-slate-800",
+								)}
 								href={viewModel.result.sharePath}
 							>
-								Open room
+								Ouvrir le salon
 							</Link>
 						</div>
 					</div>
 				) : (
-					<p className="mt-4 text-sm text-stone-300 leading-6">
-						Your guest link and room summary will appear here as soon as the
-						room is created.
-					</p>
+					<SectionHeader
+						description="Le lien invité et le résumé du salon apparaîtront ici dès la création du salon."
+						eyebrow="Partage"
+						inverted
+						title="Aucun salon créé pour le moment"
+					/>
 				)}
-			</section>
+			</Panel>
 		</div>
 	);
 }

@@ -88,6 +88,7 @@ describe("visio.service", () => {
 				slug: "room-slug",
 				displayName: "Guest",
 				linkedUserId: null,
+				now: new Date("2026-04-03T08:00:00.000Z"),
 			}),
 		).rejects.toMatchObject({
 			code: "UNAUTHORIZED",

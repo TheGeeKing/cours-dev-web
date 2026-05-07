@@ -1,6 +1,15 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 
+import {
+	Badge,
+	buttonClasses,
+	PageContainer,
+	PageShell,
+	Panel,
+	SectionHeader,
+} from "@/shared/ui";
+
 type HomeShellProps = {
 	sessionLabel: string;
 	sessionDescription: string;
@@ -9,121 +18,108 @@ type HomeShellProps = {
 };
 
 const coreMilestones = [
-	"Account profile and saved address",
-	"Catalog grid and product details",
-	"Cart, checkout, and order history",
+	"Transfert de médias",
+	"Visio",
+	"Intégration cartographique",
 ];
 
 const requiredLaterModules = [
-	"Map integration",
-	"Camera capture",
-	"Media transfer",
-	"1-to-1 video chat",
+	"Profil du compte et adresse enregistrée",
+	"Grille catalogue et détails produit",
+	"Panier, paiement et historique des commandes",
 ];
 
 const routeCatalog = [
 	{
 		href: "/",
-		title: "Home",
+		title: "Accueil",
 		path: "/",
-		description: "Public landing page for authentication state and project entry points.",
+		description: "La page d'accueil, rien de fou",
 		availability: "Public",
 	},
 	{
 		href: "/transfer",
-		title: "Transfer",
+		title: "Transfert",
 		path: "/transfer",
-		description: "Signed-in upload workspace for creating a secret share link.",
-		availability: "Signed-in",
+		description:
+			"Permet l'upload et le partage de fichiers via la génération d'un lien",
+		availability: "Connecté",
 	},
 	{
 		href: "/transfer",
-		title: "Share Page Pattern",
+		title: "Modèle de page de partage",
 		path: "/transfer/[slug]",
-		description: "Public file page generated after an upload link is created.",
-		availability: "Public after upload",
+		description: "La page à laquelle on accède avec un lien de partage",
+		availability: "Public après envoi",
 	},
 	{
 		href: "/visio",
 		title: "Visio",
 		path: "/visio",
-		description: "Signed-in host workspace for creating one-to-one video rooms.",
-		availability: "Signed-in",
+		description: "Page pour créer une visio",
+		availability: "Connecté",
 	},
 	{
 		href: "/visio",
-		title: "Room Pattern",
+		title: "Modèle de salon",
 		path: "/visio/[slug]",
-		description: "Public room page for joining, waiting, and the live video session.",
-		availability: "Public after room creation",
+		description:
+			"La page pour rejoindre, patienter et participer à une visio dont on a le lien",
+		availability: "Public après création du salon",
 	},
 ];
 
 export function HomeShell(props: HomeShellProps) {
 	return (
-		<main className="min-h-screen bg-[linear-gradient(180deg,#f7f3eb_0%,#dfe8dc_45%,#f2ede2_100%)] px-4 py-10 text-stone-900 sm:px-6 lg:px-8">
-			<div className="mx-auto flex w-full max-w-6xl flex-col gap-8">
-				<section className="overflow-hidden rounded-[2rem] border border-stone-900/10 bg-white/80 shadow-[0_24px_80px_rgba(41,37,36,0.12)] backdrop-blur">
-					<div className="grid gap-8 px-6 py-8 lg:grid-cols-[1.5fr_0.9fr] lg:px-10 lg:py-10">
+		<PageShell>
+			<PageContainer className="gap-6">
+				<Panel className="overflow-hidden p-0">
+					<div className="grid gap-6 p-6 lg:grid-cols-[1.45fr_0.9fr] lg:p-8">
 						<div className="space-y-6">
-							<p className="font-semibold text-emerald-700 text-sm uppercase tracking-[0.35em]">
-								Modular exam delivery baseline
-							</p>
-							<div className="space-y-4">
-								<h1 className="max-w-3xl font-black text-4xl text-stone-950 tracking-tight sm:text-5xl">
-									From scaffold to a real exam application.
-								</h1>
-								<p className="max-w-2xl text-base text-stone-700 leading-7 sm:text-lg">
-									This repository now acts as the delivery shell for account,
-									catalog, checkout, media, and video modules. The starter demo
-									is removed so the next commits can build directly toward the
-									exam flows.
-								</p>
-							</div>
+							<SectionHeader
+								description={
+									<>
+										Projet réalisé aucours du cours application web visant à
+										mettre en pratique l'architecture MVVM
+									</>
+								}
+								title="Projet Cours Application Web"
+								titleAs="h1"
+							/>
 							<div className="flex flex-wrap gap-3">
-								<span className="rounded-full border border-stone-900/10 bg-stone-950 px-4 py-2 font-medium text-sm text-stone-50">
-									GitHub OAuth first
-								</span>
-								<span className="rounded-full border border-emerald-700/20 bg-emerald-50 px-4 py-2 font-medium text-emerald-800 text-sm">
-									MVVM is mandatory
-								</span>
-								<span className="rounded-full border border-stone-900/10 bg-stone-100 px-4 py-2 font-medium text-sm text-stone-700">
-									Core flows before advanced modules
-								</span>
+								<Badge variant="success">Architecture MVVM</Badge>
+								<Badge variant="info">Authentification avec GitHub</Badge>
 							</div>
 						</div>
 
-						<div className="rounded-[1.5rem] border border-stone-900/10 bg-stone-950 p-6 text-stone-50">
-							<p className="font-semibold text-emerald-300 text-sm uppercase tracking-[0.3em]">
-								Session
-							</p>
-							<div className="mt-4 space-y-3">
-								<h2 className="font-semibold text-2xl">{props.sessionLabel}</h2>
-								<p className="min-h-12 text-sm text-stone-300 leading-6">
-									{props.sessionDescription}
-								</p>
-							</div>
+						<Panel className="shadow-none" tone="dark">
+							<SectionHeader
+								description={props.sessionDescription}
+								// eyebrow="Session"
+								inverted
+								title={props.sessionLabel}
+							/>
 							<div className="mt-6">{props.authAction}</div>
-						</div>
+						</Panel>
 					</div>
-				</section>
+				</Panel>
 
 				<section className="grid gap-6 lg:grid-cols-2">
 					<RoadmapCard
-						description="These are the first product modules that turn the scaffold into the exam-ready app."
+						description="Ce que je me suis fixé comme objectifs de base"
 						items={coreMilestones}
-						title="Core milestones"
+						title="Objectifs de base"
 					/>
 					<RoadmapCard
-						description="These modules stay required, but they come after the account and shop baseline is stable."
+						description="Ce que je me suis fixé une fois les objectifs de base atteints"
 						items={requiredLaterModules}
-						title="Required later modules"
+						title="Objectifs bonus"
 					/>
 				</section>
 
 				<RouteCard isSignedIn={props.isSignedIn} />
-			</div>
-		</main>
+			</PageContainer>
+		</PageShell>
 	);
 }
 
@@ -133,35 +129,34 @@ function RoadmapCard(props: {
 	items: string[];
 }) {
 	return (
-		<section className="rounded-[1.75rem] border border-stone-900/10 bg-white/75 p-6 shadow-[0_16px_48px_rgba(41,37,36,0.08)] backdrop-blur">
-			<div className="space-y-2">
-				<h2 className="font-bold text-2xl text-stone-950">{props.title}</h2>
-				<p className="text-sm text-stone-600 leading-6">{props.description}</p>
-			</div>
+		<Panel>
+			<SectionHeader description={props.description} title={props.title} />
 			<ul className="mt-5 space-y-3">
 				{props.items.map((item) => (
 					<li
-						className="rounded-2xl border border-stone-900/10 bg-stone-50 px-4 py-3 font-medium text-sm text-stone-700"
+						className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 font-medium text-slate-700 text-sm"
 						key={item}
 					>
 						{item}
 					</li>
 				))}
 			</ul>
-		</section>
+		</Panel>
 	);
 }
 
 function RouteCard(props: { isSignedIn: boolean }) {
 	return (
-		<section className="rounded-[1.75rem] border border-stone-900/10 bg-white/75 p-6 shadow-[0_16px_48px_rgba(41,37,36,0.08)] backdrop-blur">
-			<div className="space-y-2">
-				<h2 className="font-bold text-2xl text-stone-950">Accessible routes</h2>
-				<p className="text-sm text-stone-600 leading-6">
-					The current app entry points available from this baseline and the
-					transfer feature.
-				</p>
-			</div>
+		<Panel>
+			<SectionHeader
+				description={
+					<>
+						Les différentes pages et fonctionnalités disponibles dans
+						l'application.
+					</>
+				}
+				title="Routes accessibles"
+			/>
 			<ul className="mt-5 grid gap-4 lg:grid-cols-2 xl:grid-cols-3">
 				{routeCatalog.map((route) => {
 					const isSignedInWorkspace =
@@ -170,41 +165,35 @@ function RouteCard(props: { isSignedIn: boolean }) {
 
 					return (
 						<li
-							className="rounded-2xl border border-stone-900/10 bg-stone-50 p-4"
+							className="rounded-lg border border-slate-200 bg-slate-50 p-4"
 							key={route.path}
 						>
 							<div className="flex items-start justify-between gap-3">
 								<div>
-									<h3 className="font-semibold text-base text-stone-900">
+									<h3 className="font-semibold text-base text-slate-950">
 										{route.title}
 									</h3>
-									<p className="mt-1 font-mono text-sm text-emerald-800">
+									<p className="mt-1 font-mono text-slate-500 text-sm">
 										{route.path}
 									</p>
 								</div>
-								<span
-									className={`rounded-full px-3 py-1 font-medium text-xs ${
-										isAccessible
-											? "bg-emerald-100 text-emerald-800"
-											: "bg-amber-100 text-amber-800"
-									}`}
-								>
-									{isAccessible ? route.availability : "Sign in required"}
-								</span>
+								<Badge variant={isAccessible ? "success" : "warning"}>
+									{isAccessible ? route.availability : "Connexion requise"}
+								</Badge>
 							</div>
-							<p className="mt-3 text-sm text-stone-600 leading-6">
+							<p className="mt-3 text-slate-600 text-sm leading-6">
 								{route.description}
 							</p>
 							<Link
-								className="mt-4 inline-flex items-center font-semibold text-sm text-stone-950 underline decoration-stone-300 underline-offset-4 transition hover:text-emerald-700"
+								className={buttonClasses("secondary", "mt-4")}
 								href={route.href}
 							>
-								Open route
+								Ouvrir la route
 							</Link>
 						</li>
 					);
 				})}
 			</ul>
-		</section>
+		</Panel>
 	);
 }

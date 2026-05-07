@@ -3,11 +3,13 @@ export async function register() {
 		return;
 	}
 
-	const [{ registerTransferCleanupScheduler }, { registerVisioCleanupScheduler }] =
-		await Promise.all([
-			import("./features/transfer/model/transfer.scheduler"),
-			import("./features/visio/model/visio.scheduler"),
-		]);
+	const [
+		{ registerTransferCleanupScheduler },
+		{ registerVisioCleanupScheduler },
+	] = await Promise.all([
+		import("./features/transfer/model/transfer.scheduler"),
+		import("./features/visio/model/visio.scheduler"),
+	]);
 
 	await Promise.all([
 		registerTransferCleanupScheduler(),

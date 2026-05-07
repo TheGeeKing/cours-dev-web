@@ -1,5 +1,5 @@
-import { TransferShareShell } from "@/features/transfer/view/transfer-share-shell";
 import { getTransferShareState } from "@/features/transfer/model/transfer.service";
+import { TransferShareShell } from "@/features/transfer/view/transfer-share-shell";
 
 export default async function TransferSharePage(props: {
 	params: Promise<{ slug: string }>;
