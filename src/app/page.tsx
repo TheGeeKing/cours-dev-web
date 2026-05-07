@@ -60,6 +60,7 @@ export default async function Home() {
 					</form>
 				)
 			}
+			isSignedIn={!!session}
 			sessionDescription={sessionDescription}
 			sessionLabel={sessionLabel}
 		/>

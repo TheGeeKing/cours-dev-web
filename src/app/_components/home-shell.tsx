@@ -1,9 +1,11 @@
+import Link from "next/link";
 import type { ReactNode } from "react";
 
 type HomeShellProps = {
 	sessionLabel: string;
 	sessionDescription: string;
 	authAction: ReactNode;
+	isSignedIn: boolean;
 };
 
 const coreMilestones = [
@@ -17,6 +19,44 @@ const requiredLaterModules = [
 	"Camera capture",
 	"Media transfer",
 	"1-to-1 video chat",
+];
+
+const routeCatalog = [
+	{
+		href: "/",
+		title: "Home",
+		path: "/",
+		description: "Public landing page for authentication state and project entry points.",
+		availability: "Public",
+	},
+	{
+		href: "/transfer",
+		title: "Transfer",
+		path: "/transfer",
+		description: "Signed-in upload workspace for creating a secret share link.",
+		availability: "Signed-in",
+	},
+	{
+		href: "/transfer",
+		title: "Share Page Pattern",
+		path: "/transfer/[slug]",
+		description: "Public file page generated after an upload link is created.",
+		availability: "Public after upload",
+	},
+	{
+		href: "/visio",
+		title: "Visio",
+		path: "/visio",
+		description: "Signed-in host workspace for creating one-to-one video rooms.",
+		availability: "Signed-in",
+	},
+	{
+		href: "/visio",
+		title: "Room Pattern",
+		path: "/visio/[slug]",
+		description: "Public room page for joining, waiting, and the live video session.",
+		availability: "Public after room creation",
+	},
 ];
 
 export function HomeShell(props: HomeShellProps) {
@@ -80,6 +120,8 @@ export function HomeShell(props: HomeShellProps) {
 						title="Required later modules"
 					/>
 				</section>
+
+				<RouteCard isSignedIn={props.isSignedIn} />
 			</div>
 		</main>
 	);
@@ -105,6 +147,63 @@ function RoadmapCard(props: {
 						{item}
 					</li>
 				))}
+			</ul>
+		</section>
+	);
+}
+
+function RouteCard(props: { isSignedIn: boolean }) {
+	return (
+		<section className="rounded-[1.75rem] border border-stone-900/10 bg-white/75 p-6 shadow-[0_16px_48px_rgba(41,37,36,0.08)] backdrop-blur">
+			<div className="space-y-2">
+				<h2 className="font-bold text-2xl text-stone-950">Accessible routes</h2>
+				<p className="text-sm text-stone-600 leading-6">
+					The current app entry points available from this baseline and the
+					transfer feature.
+				</p>
+			</div>
+			<ul className="mt-5 grid gap-4 lg:grid-cols-2 xl:grid-cols-3">
+				{routeCatalog.map((route) => {
+					const isSignedInWorkspace =
+						route.path === "/transfer" || route.path === "/visio";
+					const isAccessible = !isSignedInWorkspace || props.isSignedIn;
+
+					return (
+						<li
+							className="rounded-2xl border border-stone-900/10 bg-stone-50 p-4"
+							key={route.path}
+						>
+							<div className="flex items-start justify-between gap-3">
+								<div>
+									<h3 className="font-semibold text-base text-stone-900">
+										{route.title}
+									</h3>
+									<p className="mt-1 font-mono text-sm text-emerald-800">
+										{route.path}
+									</p>
+								</div>
+								<span
+									className={`rounded-full px-3 py-1 font-medium text-xs ${
+										isAccessible
+											? "bg-emerald-100 text-emerald-800"
+											: "bg-amber-100 text-amber-800"
+									}`}
+								>
+									{isAccessible ? route.availability : "Sign in required"}
+								</span>
+							</div>
+							<p className="mt-3 text-sm text-stone-600 leading-6">
+								{route.description}
+							</p>
+							<Link
+								className="mt-4 inline-flex items-center font-semibold text-sm text-stone-950 underline decoration-stone-300 underline-offset-4 transition hover:text-emerald-700"
+								href={route.href}
+							>
+								Open route
+							</Link>
+						</li>
+					);
+				})}
 			</ul>
 		</section>
 	);

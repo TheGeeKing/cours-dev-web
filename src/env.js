@@ -18,6 +18,7 @@ export const env = createEnv({
 		NODE_ENV: z
 			.enum(["development", "test", "production"])
 			.default("development"),
+		VISIO_ICE_SERVERS_JSON: z.string().optional(),
 	},
 
 	/**
@@ -41,6 +42,7 @@ export const env = createEnv({
 			process.env.BETTER_AUTH_GITHUB_CLIENT_SECRET,
 		DATABASE_URL: process.env.DATABASE_URL,
 		NODE_ENV: process.env.NODE_ENV,
+		VISIO_ICE_SERVERS_JSON: process.env.VISIO_ICE_SERVERS_JSON,
 	},
 	/**
 	 * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially

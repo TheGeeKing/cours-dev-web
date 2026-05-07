@@ -1,0 +1,15 @@
+.git
+.gitignore
+.next
+node_modules
+coverage
+dist
+build
+docs
+uploads
+db.sqlite
+.env
+.env.local
+.env.*.local
+*.log
+*.tsbuildinfo
