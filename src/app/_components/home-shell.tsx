@@ -67,6 +67,13 @@ const routeCatalog = [
 			"La page pour rejoindre, patienter et participer à une visio dont on a le lien",
 		availability: "Public après création du salon",
 	},
+	{
+		href: "/map",
+		title: "Carte",
+		path: "/map",
+		description: "Carte interactive des musées de France (open data)",
+		availability: "Public",
+	},
 ];
 
 export function HomeShell(props: HomeShellProps) {
