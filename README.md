@@ -1,118 +1,150 @@
-# Modular Exam Web Application
+# Projet Cours Application Web
 
-This repository is an exam-oriented full-stack web application built from a T3-style baseline and reshaped into a modular delivery project. The goal is not to keep a generic starter alive. The goal is to implement the required module features in a controlled order, document key decisions, and apply a strict `MVVM` architecture while shipping a working application.
+Application web full-stack réalisée dans le cadre du module **B3 Dew – Application web**. Le projet met en pratique l'architecture **MVVM**, le framework **React**, et le couplage à une **API** locale, dans une application modulaire couvrant les exigences du module et du projet transverse.
 
-## Project intent
+## Objectifs
 
-The application is one codebase with several required modules. Some modules connect naturally, such as account, address, cart, checkout, and order history. Others exist because the exam requires them and do not need a forced product story.
+### Objectifs du module
 
-The guiding rule is:
+À l'issue du module, le projet vise à démontrer la maîtrise de :
 
-- one application
-- several required modules
-- phased delivery
-- explicit architecture decisions
-- small, reviewable implementation steps
+- l'environnement web (HTML, CSS, HTTP/HTTPS, cycle de vie d'une requête) ;
+- le pattern **MVVM** et la séparation claire des responsabilités ;
+- un framework front-end JavaScript du marché (**React 19** avec **Next.js 16**) ;
+- la réalisation d'un site **responsive** et **sécurisé**, couplé à une API ;
+- les bonnes pratiques de qualité logicielle : versionnage Git, tests automatisés, validation des données.
 
-## Stack baseline
+### Objectifs du projet
 
-The current technical stack remains the official baseline:
+L'application est **une seule codebase** regroupant plusieurs modules requis par le module et le projet transverse. Le projet est fait sous forme de modules qui répondent à des exigences techniques précises (carte, transfert de fichiers, visio).
 
-- Next.js App Router
-- React 19
-- TypeScript
-- tRPC
-- React Query
-- Drizzle ORM
-- Better Auth
-- Tailwind CSS
-- SQLite / libSQL
+Règles directrices :
 
-This stack is intentionally kept so the project can focus on implementation, architecture, and testing rather than re-evaluating platform choices.
+- une application, plusieurs modules ;
+- livraison par phases, avec des décisions d'architecture documentées (ADR) ;
+- **MVVM obligatoire** sur chaque fonctionnalité ;
+- tests automatisés dès les premières implémentations.
 
-## Required architecture rule
+## Fonctionnalités
 
-`MVVM` is mandatory for this project.
+### Implémentées
 
-The project uses feature-based `MVVM`, not a loose interpretation and not a single global layers-only folder structure. Each feature must clearly separate:
+| Module                  | Route(s)                        | Description                                                                                                                          |
+| ----------------------- | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| **Accueil**             | `/`                             | Présentation du projet, état de session, catalogue des routes                                                                        |
+| **Authentification**    | —                               | Connexion via **GitHub OAuth** (Better Auth), sessions sécurisées par cookie                                                         |
+| **Transfert de médias** | `/transfer`, `/transfer/[slug]` | Upload de fichiers (jusqu'à 100 Mo), lien de partage, téléchargement, expiration automatique après 7 jours                           |
+| **Visio 1-à-1**         | `/visio`, `/visio/[slug]`       | Création de salon, accès par lien, WebRTC, signalisation SSE, contrôles caméra/micro                                                 |
+| **Carte interactive**   | `/map`                          | Carte Leaflet / OpenStreetMap des musées de France (open data data.gouv.fr), filtres par région, département, catégorie et recherche |
 
-- `View`: pages, screens, layouts, and presentational components
-- `ViewModel`: hooks and orchestration logic for UI state, queries, mutations, and forms
-- `Model`: schema, validation, server procedures, domain rules, and typed contracts
+## Architecture MVVM
 
-See the architecture decisions for the official rules:
+Le projet applique un **MVVM par fonctionnalité** (*feature-based*). Chaque module regroupe ses trois couches dans `src/features/<nom>/` :
 
-- [Project direction ADR](docs/adr/0001-project-direction.md)
-- [Feature-based MVVM ADR](docs/adr/0002-feature-based-mvvm.md)
-- [Implementation roadmap](docs/roadmap.md)
+```text
+src/features/<feature>/
+├── view/           → View : composants UI, écrans, présentation
+├── view-model/     → ViewModel : hooks, orchestration, état UI
+└── model/          → Model : validation Zod, services, types, règles métier
+```
 
-## Delivery sequence
+Les routes Next.js (`src/app/`) et les routes API (`src/app/api/`) restent des points d'entrée ; la logique métier reste dans la feature concernée.
 
-The planned delivery order is:
+### Les trois couches
 
-1. Documentation reset and architectural baseline
-2. Engineering baseline cleanup and test setup
-3. Account module with profile and one saved address
-4. Catalog, cart, checkout, and order history
-5. UI quality, shared components, and responsiveness
-6. Map module
-7. Camera and media transfer module
-8. One-to-one video chat module
+| Couche        | Rôle                                                                                                     | Exemples dans le projet                                                                               |
+| ------------- | -------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| **View**      | Affichage, mise en page, composants présentationnels. Pas de logique métier ni d'appels API directs.     | `map-explorer-shell.tsx`, `transfer-upload-form.tsx`, `visio-room-shell.tsx`                          |
+| **ViewModel** | Orchestration : état local, formulaires, appels fetch, valeurs dérivées, gestion des erreurs/chargement. | `use-map-explorer-view-model.ts`, `use-transfer-upload-view-model.ts`, `use-visio-room-view-model.ts` |
+| **Model**     | Contrats typés, validation Zod, services serveur, persistance, règles domaine.                           | `map.service.ts`, `transfer.service.ts`, `visio.service.ts`, `map.validation.ts`                      |
 
-The later modules are required phases, not optional stretch work. They come after the core account and catalog flows because those flows are the safest base for the rest of the application.
+### Exemple concret : module Carte
 
-## Core product flow
+1. **View** — `MapExplorerShell` affiche le panneau de filtres et la carte. Il consomme uniquement les propriétés exposées par le ViewModel.
+2. **ViewModel** — `useMapExplorerViewModel` gère les filtres, le debounce de recherche, le chargement des facettes et des points, les libellés dérivés (`displayedCountLabel`).
+3. **Model** — `fetchMuseumPoints` et `fetchMuseumFacets` interrogent l'API open data ; `map.validation.ts` valide les paramètres côté serveur.
 
-The main end-to-end flow for the first implementation milestones is:
+```tsx
+// View : branche le ViewModel à l'UI
+const viewModel = useMapExplorerViewModel();
+return <MapFiltersPanel filters={viewModel.filters} onReset={viewModel.resetFilters} ... />;
+```
 
-- sign in with GitHub
-- browse a seeded catalog grid
-- increment or decrement quantities
-- manage a cart
-- confirm checkout with a saved address
-- accept payment through a local mock payment action
-- review order history from the user account
+### Règles transverses
 
-Payment is intentionally local and simulated. No external payment provider is required for the core scope.
+- Le code partagé (`src/shared/ui/`, utilitaires génériques) ne doit pas masquer la propriété d'une feature.
+- Toute nouvelle fonctionnalité doit pouvoir indiquer clairement où se trouvent sa View, son ViewModel et son Model.
+- Les décisions d'architecture sont documentées dans [`docs/adr/`](docs/adr/) (notamment [ADR 0002 – Feature-Based MVVM](docs/adr/0002-feature-based-mvvm.md)).
 
-## Module roadmap
+## Conformité au module
 
-### Core modules
+Le tableau ci-dessous relie les compétences visées par le module (*Guidelines B3 DW*) à ce que le projet met en œuvre.
 
-- `Account / Profile`
-- `Saved Address`
-- `Catalog`
-- `Cart`
-- `Checkout`
-- `Order History`
+| Exigence du module                            | Mise en œuvre dans le projet                                                                                               |
+| --------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| Maîtriser le modèle **MVVM**                  | Architecture feature-based documentée ; séparation View / ViewModel / Model sur chaque module                              |
+| Framework front-end JavaScript                | **React 19** + **Next.js 16** (App Router)                                                                                 |
+| Site **responsive**                           | Tailwind CSS, grilles adaptatives, composants partagés (`src/shared/ui/`)                                                  |
+| Couplage à une **API**                        | Routes REST (`/api/map`, `/api/transfer`, `/api/visio`) + **tRPC** pour les procédures typées                              |
+| Requêtes **AJAX / fetch** et échange **JSON** | `fetch` depuis les ViewModels ; réponses JSON validées avec **Zod**                                                        |
+| **Session** avec cookie                       | **Better Auth** + OAuth GitHub                                                                                             |
+| Transfert de fichiers en AJAX                 | Module Transfert : upload multipart, stockage local, lien de partage                                                       |
+| **Carte dynamique**                           | Module Carte : Leaflet, OpenStreetMap, clustering, filtres                                                                 |
+| **Chat vidéo**                                | Module Visio : WebRTC, signalisation SSE, salon 1-à-1                                                                      |
+| Bibliothèque de composants                    | Composants UI réutilisables (`Button`, `Panel`, `FormPanel`, `Field`, etc.)                                                |
+| Client B2C (profil, articles, adresse)        | Prévu en phase bonus (voir roadmap)                                                                                        |
+| **Versionnage** Git                           | Dépôt versionné, historique de commits                                                                                     |
+| **Tests** unitaires / d'intégration           | **Vitest** + Testing Library ; tests sur services, routes API, ViewModels et composants                                    |
+| Sécurité                                      | Authentification sur les routes sensibles, validation des entrées, slugs non devinables, expiration des fichiers et salons |
 
-### Required later modules
+## Stack technique
 
-- `Map`
-- `Camera`
-- `Media Transfer`
-- `1-to-1 Video Chat`
+- **Next.js** (App Router) · **React 19** · **TypeScript** (framework front-end)
+- **tRPC** · **TanStack React Query** (API)
+- **Drizzle ORM** · **SQLite / libSQL** (base de données)
+- **Better Auth** (GitHub OAuth)
+- **Tailwind CSS 4** (CSS)
+- **Leaflet** · **react-leaflet** (carte interactive)
+- **Vitest** (tests)
+- **Biome** (lint/format)
 
-## Testing strategy
+Gestionnaire de paquets : **Bun** (`bun install`, `bun dev`, `bun test`).
 
-- `Vitest` is the default automated test runner
-- testing starts early and grows with each phase
-- core flows must be covered before advanced modules are considered complete
-- authorization, validation, and unsupported browser/device states are part of the expected test surface
+## Démarrage local
 
-## Local-first assumptions
+**Prérequis** : Node.js ≥ 24, Bun, compte GitHub (pour OAuth).
 
-The project is designed for local demonstration first and can later be adapted to a self-hosted Docker or VPS deployment.
+```bash
+bun install
+cp .env.example .env   # puis renseigner les variables (auth GitHub, base de données)
+bun db:push            # initialiser le schéma
+bun dev                # http://localhost:3000
+```
 
-Planned implementation defaults:
+Commandes utiles :
 
-- GitHub OAuth as the first-class sign-in path
-- seeded database data for the catalog
-- one saved address per user in the core flow
-- dedicated upload route for file bodies
-- filesystem-backed uploads in a dedicated writable folder
-- moderate media handling appropriate for an exam demo, not production-scale uploads
+```bash
+bun test          # lancer les tests
+bun run typecheck # vérification TypeScript
+bun run check     # lint Biome
+bun run build     # build de production
+```
 
-## Current state
+## Structure du dépôt
 
-The repository currently still contains much of the original scaffold baseline. The roadmap and ADRs define the target implementation order, but most product modules are not implemented yet.
+```text
+src/
+├── app/              # Routes Next.js et points d'entrée API
+├── features/         # Modules MVVM (map, transfer, visio, …)
+├── server/           # Base de données, tRPC, auth
+└── shared/           # UI partagée et utilitaires transverses
+docs/
+├── adr/              # Décisions d'architecture
+└── roadmap.md        # Feuille de route par phases
+```
+
+## Documentation complémentaire
+
+- [Direction du projet (ADR 0001)](docs/adr/0001-project-direction.md)
+- [MVVM par fonctionnalité (ADR 0002)](docs/adr/0002-feature-based-mvvm.md)
+- [Feuille de route d'implémentation](docs/roadmap.md)
