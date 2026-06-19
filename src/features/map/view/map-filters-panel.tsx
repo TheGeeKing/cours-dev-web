@@ -1,7 +1,7 @@
 import type {
   MapFacetState,
   MapFilterForm,
-} from "@/features/map/view-model/use-map-explorer-view-model";
+} from "@/features/map/model/map.types";
 import {
   Badge,
   Button,

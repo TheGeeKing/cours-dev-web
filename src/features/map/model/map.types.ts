@@ -33,3 +33,16 @@ export type MapPointsResponse = {
 export type MapFacetsResponse = {
 	facets: MapFacet[];
 };
+
+export type MapFilterForm = {
+	region: string;
+	department: string;
+	category: string;
+	search: string;
+};
+
+export type MapFacetState = {
+	regions: MapFacet[];
+	departments: MapFacet[];
+	categories: MapFacet[];
+};

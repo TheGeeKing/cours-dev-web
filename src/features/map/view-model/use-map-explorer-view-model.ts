@@ -4,26 +4,14 @@ import { useDebouncedValue } from "@tanstack/react-pacer";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import type {
-	MapFacet,
 	MapFacetName,
+	MapFacetState,
 	MapFacetsResponse,
+	MapFilterForm,
 	MapFilters,
 	MapPoint,
 	MapPointsResponse,
 } from "@/features/map/model/map.types";
-
-export type MapFilterForm = {
-	region: string;
-	department: string;
-	category: string;
-	search: string;
-};
-
-export type MapFacetState = {
-	regions: MapFacet[];
-	departments: MapFacet[];
-	categories: MapFacet[];
-};
 
 const emptyFilterForm: MapFilterForm = {
 	region: "",
