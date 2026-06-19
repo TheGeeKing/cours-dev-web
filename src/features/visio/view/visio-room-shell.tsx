@@ -396,11 +396,12 @@ export function VisioRoomShell(props: {
 											).toString()}
 								</p>
 								<Button
-									className="mt-4 bg-white text-slate-900 hover:bg-slate-100"
+									className="mt-4"
 									onClick={() => {
 										void viewModel.handleCopyLink();
 									}}
 									type="button"
+									variant="secondary"
 								>
 									{viewModel.isCopied
 										? "Lien copié"

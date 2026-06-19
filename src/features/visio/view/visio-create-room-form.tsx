@@ -135,11 +135,11 @@ export function VisioCreateRoomForm(props: { defaultDisplayName: string }) {
 						</DataList>
 						<div className="flex flex-wrap gap-3">
 							<Button
-								className="bg-white text-slate-900 hover:bg-slate-100"
 								onClick={() => {
 									void viewModel.handleCopyLink();
 								}}
 								type="button"
+								variant="secondary"
 							>
 								{viewModel.isCopied ? "Lien copié" : "Copier le lien du salon"}
 							</Button>

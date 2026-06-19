@@ -1,0 +1,15 @@
+---
+description: Use Bun as the package manager and script runner
+alwaysApply: true
+---
+
+# Package manager: Bun
+
+This project uses **Bun**, not npm or yarn.
+
+- Install dependencies: `bun install`
+- Add a package: `bun add <pkg>` / `bun add -d <pkg>`
+- Run scripts: `bun run <script>` or `bun <script>` (e.g. `bun dev`, `bun test`)
+- Execute binaries: `bunx <cmd>` instead of `npx`
+
+Never use `npm`, `npx`, `yarn`, or `pnpm` unless the user explicitly asks.

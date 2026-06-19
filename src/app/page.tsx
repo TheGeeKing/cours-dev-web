@@ -22,7 +22,7 @@ export default async function Home() {
 				session ? (
 					<form>
 						<Button
-							className="w-full bg-white text-slate-900 hover:bg-slate-100"
+							className="w-full"
 							formAction={async () => {
 								"use server";
 								await auth.api.signOut({
@@ -31,6 +31,7 @@ export default async function Home() {
 								redirect("/");
 							}}
 							type="submit"
+							variant="secondary"
 						>
 							Se déconnecter
 						</Button>
@@ -38,7 +39,7 @@ export default async function Home() {
 				) : (
 					<form>
 						<Button
-							className="w-full bg-white text-slate-900 hover:bg-slate-100"
+							className="w-full"
 							formAction={async () => {
 								"use server";
 								const res = await auth.api.signInSocial({
@@ -53,6 +54,7 @@ export default async function Home() {
 								redirect(res.url);
 							}}
 							type="submit"
+							variant="secondary"
 						>
 							Se connecter avec GitHub
 						</Button>

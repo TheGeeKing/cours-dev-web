@@ -98,11 +98,11 @@ export function TransferUploadForm() {
 							/>
 						</DataList>
 						<Button
-							className="bg-white text-slate-900 hover:bg-slate-100"
 							onClick={() => {
 								void viewModel.handleCopyLink();
 							}}
 							type="button"
+							variant="secondary"
 						>
 							{viewModel.isCopied ? "Lien copié" : "Copier le lien de partage"}
 						</Button>
